@@ -96,6 +96,69 @@
     };
     return a
 });
+$.fn.extend({
+    fiHandler:function(e){
+        e.stopPropagation();
+        this.removeClass("opacity "+this.tp.cls);
+        if(this.tp.cb){this.tp.cb();};
+        this.off("webkitAnimationEnd");
+        this.tp.cb = undefined;
+        this.tp.duration = this.tp.cls = "";
+    },
+    foHandler:function(e){
+        e.stopPropagation();
+        this.hide().removeClass(this.tp.cls);
+        if(this.tp.cb){this.tp.cb();};
+        this.off("webkitAnimationEnd");
+        this.tp.cb = undefined;
+        this.tp.duration = this.tp.cls = "";
+    },
+    fi:function(cb){
+        this.tp = {
+            cb:undefined,
+            duration:"",
+            cls:"",
+        };
+        this.tp.cls = "ani-fadeIn";
+        if(arguments){
+            for(var prop in arguments){
+                switch(typeof arguments[prop]){
+                    case "function":
+                        this.tp.cb = arguments[prop];
+                        break;
+                    case "number":
+                        this.tp.duration = arguments[prop];
+                        this.tp.cls += this.tp.duration;
+                        break;
+                }
+            }
+        }
+        this.on("webkitAnimationEnd", this.fiHandler.bind(this)).addClass("opacity " + this.tp.cls).show();
+        return this;
+    },
+    fo:function(cb){
+        this.tp = {
+            cb:undefined,
+            duration:"",
+            cls:"",
+        };
+        this.tp.cls = "ani-fadeOut";
+        if(arguments){
+            for(var prop in arguments){
+                switch(typeof arguments[prop]){
+                    case "function":
+                        this.tp.cb = arguments[prop];
+                        break;
+                    case "number":
+                        this.tp.duration = arguments[prop];
+                        this.tp.cls += this.tp.duration;
+                }
+            }
+        }
+        this.on("webkitAnimationEnd",this.foHandler.bind(this)).addClass(this.tp.cls);
+        return this;
+    }
+});
 var Utils = new function(){
     this.preloadImage = function(ImageURL,callback,realLoading){
         var rd = realLoading||false;
@@ -261,7 +324,7 @@ var options = {
 
         /*页面切换控制*/
         ploading:{
-            visible:true,
+            visible:false,
         },
         pwebgl:{
             visible:false,
@@ -281,8 +344,34 @@ var options = {
         pvideo:{
             visible:false,
         },
+        pend:{
+            visible:false,
+        },
+        pshare:{
+            visible:false,
+        },
+        pquery:{
+            visible:false,
+        },
+        pguanzhu:{
+            visible:false,
+        },
         prule:{
             visible:false,
+        },
+        palert:{
+            visible:false,
+            type:"",
+            choice:{
+                fill:"fill",
+                normal:"normal",
+            },
+            content:"",//主文字
+            title:"",//标题
+            txt:[
+                "",
+                "您当前的粮票不足，皇家会员每天有多种方式获取粮票哦!~"
+            ]
         },
         hpwarn:{
             visible:false,
@@ -291,10 +380,12 @@ var options = {
             visible:false,
         },
         /*页面切换控制*/
-
-
     },
     methods:{
+                                                        /*webgl*/
+        pwegbl_btn_chaxun:function(){
+            this.pquery.visible = true;
+        },
                                                         /*提交信息页*/
         pfill_btn_submit:function(){
             var number = this.server_data.tel;
@@ -302,33 +393,33 @@ var options = {
             var patt = /^1(3|4|5|7|8)\d{9}$/;
 
             if(name == ""){
-                this.pmask.type = this.pmask.choice.normal;
-                this.pmask.content = "请输入姓名";
-                this.pmask.visible = true;
+                this.palert.type = this.palert.choice.normal;
+                this.palert.content = "请输入姓名";
+                this.palert.visible = true;
                 return;
             };
             if(!(patt.test(number))){
-                this.pmask.type = this.pmask.choice.normal;
-                this.pmask.content = "请输入正确的手机号";
-                this.pmask.visible = true;
+                this.palert.type = this.palert.choice.normal;
+                this.palert.content = "请输入正确的手机号";
+                this.palert.visible = true;
                 return;
             };
             if(this.server_data.select_province == ""){
-                this.pmask.type = this.pmask.choice.normal;
-                this.pmask.content = "请选择省份";
-                this.pmask.visible = true;
+                this.palert.type = this.palert.choice.normal;
+                this.palert.content = "请选择省份";
+                this.palert.visible = true;
                 return;
             }
             if(this.server_data.select_city == ""){
-                this.pmask.type = this.pmask.choice.normal;
-                this.pmask.content = "请选择城市";
-                this.pmask.visible = true;
+                this.palert.type = this.palert.choice.normal;
+                this.palert.content = "请选择城市";
+                this.palert.visible = true;
                 return;
             }
             if(this.server_data.select_address == ""){
-                this.pmask.type = this.pmask.choice.normal;
-                this.pmask.content = "请选择门店";
-                this.pmask.visible = true;
+                this.palert.type = this.palert.choice.normal;
+                this.palert.content = "请选择门店";
+                this.palert.visible = true;
                 return;
             }
 
@@ -361,12 +452,21 @@ var options = {
                 this[page].visible = true;
                 this.router.splice(len-1,1)
             }
-        }
+        },
+        openAlert:function(type,content){
+            
+        },
+        closeAlert:function(){
+            this.palert.visible = false;
+            this.palert.type = "";
+            this.palert.content = "";
+
+        },
     },
     delimiters: ['$[', ']']
 }
 var vm = new Vue(options);
-
+vm.ploading.visible = true;
 
 /***********************three***********************/
 var three = new function(){
@@ -1146,8 +1246,22 @@ main.TranslateBg = function(){
 };
 main.loadCallBack = function(){
     vm.ploading.visible = false;
-    vm.pwebgl.visible = true;
-    this.startRender();
+    $(".bg1").fo();
+    $(".bg2").fi();
+    // vm.pwebgl.visible = true;
+    // this.startRender();
+
+    // vm.pshare.visible = true;
+    // vm.pend.visible = true;
+    // vm.pguanzhu.visible = true;
+    // vm.pfill.visible = true;
+    vm.palert.visible = true;
+    var type = vm.palert.choice.fill; 
+    var content = vm.palert.txt[type];
+    vm.palert.content = "你还未填写领奖信息，赶快去填写吧"
+
+
+
     main.addEvent();
 // setTimeout(function(){
 //     TweenMax.to(webgl.earthGroup.position,4,{x:0,y:0,z:0,ease:"Linear.easeNone"})
@@ -1160,6 +1274,7 @@ main.loadCallBack = function(){
 
 
 };
+
 main.prule = function(){
     $(".P_rule").fi();
     main.scrollInit(".rule-txt",0)
@@ -1302,8 +1417,8 @@ main.scrollInit = function(selector,start){
     this.touch.limitDown = this.touch.ScrollObj.height()<this.touch.container.height()?0:(this.touch.container.height()-this.touch.ScrollObj.height());
 };
 
-// main.init();
-// main.start();
+main.init();
+main.start();
 
 
 

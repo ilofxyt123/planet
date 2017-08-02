@@ -58,14 +58,15 @@ img{position: absolute;}
         .galaxy{width:6rem;left:50%;margin-left:-3rem;top:2.3rem;z-index: 1;}
 
     .P_fill{}
-        .pfill-title{width:4.02rem;top:1.56rem;left:50%;margin-left:-2.01rem;}
-        .fill-box{width:3.88rem;height:3rem;position: absolute;left:50%;margin-left:-1.94rem;top:2.28rem;background-image: url("../assets/images/p11-kuang.png");background-repeat: no-repeat;background-size:100%;}
-            .fill-box .name-box{margin-bottom:0.2rem;}
-            .fill-box .select-box{margin-top:0.2rem;}
-                .fill-box .province{left:0;}
-                .fill-box .city{right:0;}
-        .pfill-tip{width:3.98rem;left:50%;margin-left:-1.99rem;top:5.8rem;}
-        .pfill-btn{width:3.08rem;left:50%;margin-left:-1.54rem;top:7.4rem;}
+        .pfill-bg{width:6.4rem;z-index:-1;}
+        .P_fill .content-box{width:4rem;position:absolute;left:50%;margin-left:-2rem;top:1rem;}
+            .P_fill .content-box .pfill-info{width:100%;z-index:-1;top:0.42rem;}
+            .P_fill .content-box .fill-box{width:3.88rem;height:3rem;position: absolute;left:50%;margin-left:-1.94rem;top:1.48rem;}
+                .fill-box .name-box{margin-bottom:0.2rem;}
+                .fill-box .select-box{margin-top:0.2rem;}
+                    .fill-box .province{left:0;}
+                    .fill-box .city{right:0;}
+            .pfill-btn{width:3.08rem;left:50%;margin-left:-1.54rem;top:7.4rem;}
 
     .P_address{background-color:rgba(0,0,0,0.8);z-index:101;}
         .paddress-box{width:4.7rem;height:6.53rem;position: absolute;left:50%;margin-left:-2.35rem;top:1.65rem;}

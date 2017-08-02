@@ -32,38 +32,69 @@
             .long-press.btn-box{width:1.2rem;height:1.2rem;position: absolute;left:50%;margin-left:-0.6rem;top:8rem;z-index:10;background-image:url("assets/images/p1-btn.png");background-repeat: no-repeat;background-size:1.2rem;}
                     .long-press.btn-box .press-tip{width:1.4rem;left:50%;margin-left:-0.7rem;bottom:-0.3rem;}
 
+            .chaxun-btn{width:0.9rem;right:0.2rem;bottom:0.2rem;}
         .top{width:100%;position:absolute;top:0;z-index:99;height:0.9rem;}
             .logo{width:0.7rem;left:0.2rem;top:0.2rem;}
             .rule{width:0.48rem;top:0.2rem;right:0.2rem;}
 
         .P_loading{}
+            .P_loading .text-box{width:2.88rem;height:0.95rem;position:absolute;left:50%;margin-left:-1.44rem;top:1.5rem;}
+                .text-box .text{width:2.88rem;}
+                .text-box .text1{}
+                .text-box .text2{}
+                .text-box .text3{}
+
             .loading-box{width:0.84rem;position:absolute;left:50%;margin-left:-0.42rem;top:8.8rem;}
                 .loading-box .loading-arr{width:0.84rem;position:static;}
                 .loading-box .num{width:0.64rem;height:0.3rem;line-height:0.3rem;color:white;position:absolute;left:0.1rem;top:50%;margin-top:-0.14rem;font-size:0.2rem;text-align:center;}
+        
+        .P_share{}
+            .share-mask{width:6.4rem;z-index:-1;top:0;}
+            .share-pic{width:2.6rem;left:50%;margin-left:-1.3rem;top:2.4rem;}
 
+        .P_guanzhu{}
+            .P_guanzhu .content-box{width:5.16rem;height:8.06rem;position:absolute;left:50%;margin-left:-2.58rem;top:1rem;}
+                .content-box .kuang{width:5.16rem;z-index:1;}
+                .content-box .txt{width:3.38rem;left:50%;margin-left:-1.69rem;top:1rem;z-index:2;}
+                .content-box .code{width:2.5rem;left:50%;margin-left:-1.25rem;top:4.5rem;z-index:2;}
+
+        .P_alert{}
+            .P_alert .palert-bg{width:6.4rem;z-index:-1;}
+            .P_alert .alert-box{position:absolute;width:4.5rem;height:3.4rem;left:50%;margin-left:-2.25rem;top:3.12rem;}
+            .alert-box .alert-xx{width:0.4rem;height:0.4rem;position:absolute;right:0.15rem;top:0.15rem;}
+            .alert-box .content{margin-top:1.2rem;width:100%;padding:0 1rem;text-align: center;font-size:0.24rem;color:#3f3f3f;line-height:0.3rem;}
+            .alert-box .btn{width:2.34rem;left:50%;margin-left:-1.17rem;bottom:0.6rem;}
     </style>
 
 </head>
 <body>
 
 <div id="iCreative">
+    <!--top-->
     <div class="top">
         <img src="assets/images/logo.png" class="logo">
         <img src="assets/images/ruleicon.png" class="rule">
     </div>
+
+    <!--bg-->
     <div class="container P_bg" id="bg">
-         <img src="assets/images/loading-bg.jpg" class="bg-pic bg-pic1" id="translateBg">
-         <img src="assets/images/loading-1.png" class="galaxy">
+        <div class="bg1">
+            <img src="assets/images/loading-bg.jpg" class="bg-pic bg-pic1" id="translateBg">
+            <img src="assets/images/loading-1.png" class="galaxy">
+        </div>
+        <div class="bg2" style="display:none;">
+            <img src="assets/images/bg2.jpg" alt="" class="bg-pic">
+        </div>
     </div>
 
     <!--loading-->
     <transition leave-active-class="ani-fadeOut">
-        <div class="container P_loading" v-show="ploading.visible">
+        <div class="container P_loading" v-show="ploading.visible" style="display:none;">
             <!-- <img src="assets/images/star.png" class="star ani-star"> -->
             <div class="text-box">
-                <img src="" alt="">
-                <img src="" alt="">
-                <img src="" alt="">
+                <img src="assets/images/loading-txt-1.png" alt="" class="text text1 opacity ani-fadeIn">
+                <img src="assets/images/loading-txt-2.png" alt="" class="text text2 opacity ani-fadeIn delay02">
+                <img src="assets/images/loading-title-1.png" alt="" class="text text3 opacity ani-fadeIn delay04">
             </div>
             <div class="loading-box">
                 <img src="assets/images/loading-arrow.png" class="loading-arr">
@@ -95,6 +126,8 @@
                 <img src="assets/images/p1-txt-1.png" class="press-tip">
             </div>
 
+            <img src="assets/images/p1-bx-baoxiang.png" alt="" class="chaxun-btn" @touchend="pwegbl_btn_chaxun">
+
         </div>
     </transition>
     
@@ -102,38 +135,41 @@
     <!--信息填写页-->
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
         <div class="container P_fill" v-show="pfill.visible" style="display:none;">
-            <img src="assets/images/pfill-title.png" class="pfill-title">
-            <div class="fill-box">
-                <div class="input-box">
-                    <div class="name-box">
-                        <input type="text" id="name" class="ui-input-name" placeholder="姓名" v-model="server_data.name">
+            <img src="assets/images/bg3.jpg" alt="" class="pfill-bg">
+            <div class="content-box">
+                <img src="assets/images/p5-infro.png" class="pfill-info">
+                <div class="fill-box">
+                    <div class="input-box">
+                        <div class="name-box">
+                            <input type="text" id="name" class="ui-input-name" placeholder="姓名" v-model="server_data.name">
+                        </div>
+                        <div class="phone-box">
+                            <input type="tel" id="phone" class="ui-input-phone" placeholder="手机" v-model="server_data.tel" oninput="main.limitNum(this)">
+                        </div>
                     </div>
-                    <div class="phone-box">
-                        <input type="tel" id="phone" class="ui-input-phone" placeholder="手机" v-model="server_data.tel" oninput="main.limitNum(this)">
+                    <div class="select-box">
+                        <select class="ui-select1 province" @change="onPfillProvinceChangeHandle($event)" v-model="server_data.select_province">
+                            <option disabled value="">请选择省份</option>
+                            <option v-for="data in server_data.province">
+                                $[data.province]
+                            </option>
+                        </select>
+                        <select class="ui-select1 city" @change="onPfillCityChangeHandle($event)" v-model="server_data.select_city">
+                            <option disabled value="">请选择城市</option>
+                            <option v-for="data in server_data.city">
+                                $[data.city]
+                            </option>
+                        </select>
+                        <select class="ui-select2 address" @change="onPfillAddressChangeHandle($event)" v-model="server_data.select_address">
+                            <option disabled value="">请选择门店</option>
+                            <option v-for="data in server_data.address" v-bind:shopid="data.id">
+                                $[data.name]
+                            </option>
+                        </select>
                     </div>
-                </div>
-                <div class="select-box">
-                    <select class="ui-select1 province" @change="onPfillProvinceChangeHandle($event)" v-model="server_data.select_province">
-                        <option disabled value="">请选择省份</option>
-                        <option v-for="data in server_data.province">
-                            $[data.province]
-                        </option>
-                    </select>
-                    <select class="ui-select1 city" @change="onPfillCityChangeHandle($event)" v-model="server_data.select_city">
-                        <option disabled value="">请选择城市</option>
-                        <option v-for="data in server_data.city">
-                            $[data.city]
-                        </option>
-                    </select>
-                    <select class="ui-select2 address" @change="onPfillAddressChangeHandle($event)" v-model="server_data.select_address">
-                        <option disabled value="">请选择门店</option>
-                        <option v-for="data in server_data.address" v-bind:shopid="data.id">
-                            $[data.name]
-                        </option>
-                    </select>
                 </div>
             </div>
-            <img src="assets/images/pfill-txt-3.png" class="pfill-tip">
+            
             <img src="assets/images/p11-btn.png" class="pfill-btn" @touchend="pfill_btn_submit">
         </div>
     </transition>
@@ -175,6 +211,56 @@
         <!--</div>-->
     <!--</transition>-->
 
+    <!--query-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+        <div class="container P_query" v-show="pquery.visible" style="display:none;">
+            
+        </div>
+    </transition>
+
+    <!--guanzhu-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+        <div class="container P_guanzhu" v-show="pguanzhu.visible" style="display:none;">
+            <div class="content-box">
+                <img src="assets/images/kuang.png" alt="" class="kuang">
+                <img src="assets/images/p5-txt.png" alt="" class="txt">
+                <img src="assets/images/p5-ewm.png" alt="" class="code">
+            </div>
+        </div>
+    </transition>
+
+    <!--share-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+        <div class="container P_share" v-show="pshare.visible" style="display:none;">
+            <img src="assets/images/p1-zhezhao.png" class="share-mask">
+            <img src="assets/images/share.png" alt="" class="share-pic">
+        </div>
+    </transition>
+
+    <!--end-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+        <div class="container P_end" v-show="pend.visible" style="display:none;">
+            
+        </div>
+    </transition>
+
+    <!--alert-->
+    <transition enter-active-class="ani-fadeIn">
+        <div class="container P_alert" v-show="palert.visible" style="display:none;">
+            <img src="assets/images/box.png" alt="" class="palert-bg">
+            <div class="alert-box alert-box1">
+                <div class="alert-xx" @touchend="closeAlert"></div>
+                <p class="content">
+                    $[palert.content]
+                </p>
+                <img src="assets/images/box-btn-2.png" alt="" class="btn btn1" v-show="palert.type == palert.choice.fill">
+            </div>
+        </div>
+    </transition>
+
+
+
+    <!--hp-->
     <div class="hp" v-show="hpwarn.visible" style="display:none;">
         <div class="hp_box">
             <img src="assets/images/phone.png" class="phone">
@@ -182,6 +268,7 @@
         </div>
     </div>
 
+    <!--wait-->
     <div class="container P_wait" v-show="pwait.visible" style="display:none;">
         <div class="preloader-indicator-modal">
             <span class="preloader preloader-white"></span>
@@ -191,7 +278,7 @@
 
 <script src="js/jquery-3.2.1.min.js"></script>
 <script>
-    var $container = $("#bg");
+    var $container = $(".P_loading");
     var img = new Image();
     var width = window.innerWidth;
     var height = window.innerHeight;

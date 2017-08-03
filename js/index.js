@@ -172,9 +172,8 @@ var Utils = new function(){
                     if(rd){
                         $num.html(num+"%");
                     }
-                    if (main.loader.haveLoad == main.loader.total && !main.loader.complete) {
-                        main.loader.complete = true;
-                        callback && callback()
+                    if (main.loader.haveLoad == main.loader.total) {
+                            callback && callback()
                     }
                 };
                 img.onerror = function() {};
@@ -368,10 +367,9 @@ var options = {
             },
             content:"",//主文字
             title:"",//标题
-            txt:[
-                "",
-                "您当前的粮票不足，皇家会员每天有多种方式获取粮票哦!~"
-            ]
+            txt: {
+                fill:"你还未填写领奖信息，赶快去填写吧",
+            }
         },
         hpwarn:{
             visible:false,
@@ -454,7 +452,9 @@ var options = {
             }
         },
         openAlert:function(type,content){
-            
+            this.palert.type = type;
+            this.palert.content = content;
+            this.palert.visible = true;
         },
         closeAlert:function(){
             this.palert.visible = false;
@@ -484,9 +484,9 @@ three.init = function(){
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(45,this.width/this.height,0.1,10000);
-    this.camera.position.y = -50;
-    this.camera.position.z = 100;
+    this.camera = new THREE.PerspectiveCamera(45,this.width/this.height,0.1,300000);
+    this.camera.position.y = 50;
+    this.camera.position.z = 1600;
 
 
     this.renderer = new THREE.WebGLRenderer({antialias:true});
@@ -501,6 +501,7 @@ three.init = function(){
 
     this.ddsloader = new THREE.DDSLoader();
     THREE.Loader.Handlers.add(/\.dds$/i,this.ddsloader);
+
 
 };
 
@@ -518,40 +519,35 @@ three.loadOBJ = function(config){
         console.log(config.material)
     }
 
-    objloader.load(config.objFile,function(object){//加载路径,成功回调，参数可以是整个模型对象Group也可以是单个object(mesh)
-        config.callback && config.callback(object)
-        object.name = config.modelName;//给物体一个名字
-        object.position.x = webgl.OBJData[config.modelName].position.x;
-        object.position.y = webgl.OBJData[config.modelName].position.y;
-        object.position.z = webgl.OBJData[config.modelName].position.z;
+    objloader.load(config.objFile,function(group){//加载路径,成功回调，参数可以是整个模型对象Group也可以是单个object(mesh)
+        config.callback && config.callback(group)
 
-        object.rotation.x = webgl.OBJData[config.modelName].rotation.x;
-        object.rotation.y = webgl.OBJData[config.modelName].rotation.y;
-        object.rotation.z = webgl.OBJData[config.modelName].rotation.z;
+        group.name = config.modelName;//给物体一个名字
+        group.position.x = webgl.OBJData[config.modelName].position.x;
+        group.position.y = webgl.OBJData[config.modelName].position.y;
+        group.position.z = webgl.OBJData[config.modelName].position.z;
 
-        object.scale.x = webgl.OBJData[config.modelName].scale.x;
-        object.scale.y = webgl.OBJData[config.modelName].scale.y;
-        object.scale.z = webgl.OBJData[config.modelName].scale.z;
+        group.rotation.x = webgl.OBJData[config.modelName].rotation.x;
+        group.rotation.y = webgl.OBJData[config.modelName].rotation.y;
+        group.rotation.z = webgl.OBJData[config.modelName].rotation.z;
+
+        group.scale.x = webgl.OBJData[config.modelName].scale.x;
+        group.scale.y = webgl.OBJData[config.modelName].scale.y;
+        group.scale.z = webgl.OBJData[config.modelName].scale.z;
 
 
-
-        // console.log(object)
-
-        webgl.OBJData[config.modelName].obj = object;//存入到全局OBJ数据中
-        three.scene.add(object);
+        webgl.OBJData[config.modelName].obj = group;//存入到全局OBJ数据中
         
 
         if(webgl.OBJData[config.modelName].needTouch){//根据需要加入touch搜索列表
             webgl.touchObjects.push(object);
         }
 
-        webgl.loader.haveLoad++;
         main.loader.haveLoad++;
         var completePercent = Math.round(main.loader.haveLoad/main.loader.total*100);
         $(".num").html(completePercent+"%")
-        if(main.loader.haveLoad == main.loader.total && !main.loader.complete){
-            main.loader.complete = true;
-            main.loadCallBack();
+        if(main.loader.haveLoad == main.loader.total ){     
+                main.loadCallBack();          
         }
     },function(progress){
         // console.log(progress)
@@ -660,16 +656,17 @@ three.getAmbientLight = function(config){
 };//环境光,return光线实例
 
 three.getSkyByCubeGeo = function(config){
+    var path = "assets/texture/"
     config = config ? config : {};
     config.size = config.size ? config.size : 1024;
     config.format = config.format ? config.format : ".jpg";
     config.urls = config.urls ? config.urls : [
-        this.path.texture+"right"+config.format,
-        this.path.texture+"left"+config.format,
-        this.path.texture+"up"+config.format,
-        this.path.texture+"down"+config.format,
-        this.path.texture+"front"+config.format,
-        this.path.texture+"back"+config.format,
+        path+"right"+config.format,
+        path+"left"+config.format,
+        path+"up"+config.format,
+        path+"down"+config.format,
+        path+"front"+config.format,
+        path+"back"+config.format,
     ];
 
     var materials = [];
@@ -834,6 +831,7 @@ var webgl = new function(){
     this.loader = {
         haveLoad:0,
         total:0,
+        complete:false,
     };
 
     //可被touch到的物体,this.touchObjects.indexOf(testObj) !=-1
@@ -841,46 +839,20 @@ var webgl = new function(){
 
     //一般为带纹理的整个模型,配置信息
     this.OBJData = {
-        // city:{
-        //     name:"city",
-        //     baseUrl:"assets/",
-        //     mtlFile:"models/city/scenes/scenes.mtl",
-        //     objFile:"assets/models/city/scenes/scenes.obj",
-
-        //     position:{x:0,y:0,z:0},
-        //     rotation:{x:0,y:0,z:0},
-        //     scale:{x:1,y:1,z:1},
-
-        //     needTouch:true,
-        //     obj:undefined,
-        // },
-        // robot:{
-        //     name:"robot",
-        //     baseUrl:"assets/",
-        //     mtlFile:"models/robot/robot1.mtl",
-        //     objFile:"assets/models/robot/robot1.obj",
-
-        //     position:{x:0,y:0,z:0},
-        //     rotation:{x:0,y:0,z:0},
-        //     scale:{x:1,y:1,z:1},
-
-        //     needTouch:true,
-        //     obj:undefined,
-        // }
-
-        planet:{
-            name:"planet",
+        scene:{
+            name:"scene",
             baseUrl:"assets/",
-            mtlFile:"models/planet/planet.mtl",
-            objFile:"assets/models/planet/planet.obj",
-            texture:"assets/models/planet/planet.png",
+            mtlFile:"models/scene/scene.mtl",
+            objFile:"assets/models/scene/scene.obj",
+            // texture:"assets/models/scene/scene.png",
 
             position:{x:0,y:0,z:0},
             rotation:{x:0,y:0,z:0},
             scale:{x:0.07,y:0.07,z:0.07},
 
-            needTouch:true,
-            obj:undefined,
+            needTouch:false,
+            liusu_center:undefined,
+            liusu_up:undefined,
         }
     };
 
@@ -889,10 +861,7 @@ var webgl = new function(){
 
     };
 
-    //纹理序列
-    this.earthChangeTexture = [];
-    //切换到第几张纹理
-    this.textureIndex = 0;
+    
 
 
     const SQ3 = Math.sqrt(3);
@@ -902,21 +871,30 @@ var webgl = new function(){
     this.PointData = {
         point1:{
             name:"point1",
-            position:new THREE.Vector3(20,0,0),
+            position:new THREE.Vector3(300,0,0),
             obj:undefined,
         },
         point2:{
             name:"point2",
-            position:new THREE.Vector3(20/SQ3,20/SQ3,20/SQ3),
+            position:new THREE.Vector3(300/SQ3,300/SQ3,300/SQ3),
             obj:undefined,
         }
     };
-    //云
-    this.cloud = undefined;
+
     //背景天空
     this.sky = undefined;
+    //云
+    this.cloud = undefined;
+    this.stone1 = undefined;
+    this.stone2 = undefined;
+    
+    
     //云+地球的整体
     this.earthGroup = undefined;
+    //纹理序列
+    this.earthChangeTexture = [];
+    //切换到第几张纹理
+    this.textureIndex = 0;
 
 
     //纹理路径
@@ -925,11 +903,7 @@ var webgl = new function(){
     this.clock = new THREE.Clock();
 };
 webgl.init = function(){
-    if(this.debug){
-        this.addFps();
-    }
     this.loader.total = Object.keys(this.OBJData).length;
-
     for(var i=0;i<3;i++){
         var texture = three.loadTexture({
                             url:this.texturePath + "cloud"+[i] +".png"
@@ -938,14 +912,7 @@ webgl.init = function(){
         this.earthChangeTexture.push(texture)
     }
 
-    this.addAmbientLight();//光线
-    this.addDirectionLight();//增加方向光
-    this.addOrbit();//加控制器
-    // this.addEarth();//加地球
-    this.addSky();//加天空
-    if(this.debug){
-        this.addAxisHelper();//增加坐标轴辅助线
-    }
+    
 
 
 
@@ -963,21 +930,36 @@ webgl.load = function(){
         three.loadOBJ({
            modelName:config.name, 
            objFile:config.objFile,
-            callback:function(object){
-                var material = new THREE.MeshLambertMaterial({
-                    map:three.loadTexture({
-                        url:config.texture,
-                    })
-                });
-                object.children[0].material = material;
+            callback:function(group){
+                console.log(group)
+                webgl.stone1 = group.children[0];
+                webgl.stone2 = group.children[1]; 
+                webgl.liusu_up = group.children[2];
+                webgl.liusu_center = group.children[3];
+                webgl.planet = group.children[4];
+                
+                // object.children[0].material = material;
             }
         })
     }
 
 };
+webgl.loadCallback = function(){
+    // if(this.debug){
+    //     this.addFps();
+    // }
+    this.addAmbientLight();//加环境光
+    this.addDirectionLight();//加方向光
+    this.addOrbit();//加控制器
+    this.addEarth();//加地球
+    this.addSky();//加天空
+    // if(this.debug){
+    //     this.addAxisHelper();//增加坐标轴辅助线
+    // }
+};
 webgl.addAmbientLight = function(){
     var ambientLight = three.getAmbientLight({
-        color:0xeeeeee,
+        color:0x000000,
         intensity:1,
     });//可被移除的对象
     three.scene.add(ambientLight);
@@ -985,11 +967,11 @@ webgl.addAmbientLight = function(){
 webgl.addDirectionLight = function(){
     var directionLight = three.getDirectionalLight({
         color:0x111111,
-        intensity:0.01,
-        position:{x:-500,y:300,z:200}
+        intensity:0.1,
+        position:{x:0,y:300,z:0}
     });
 
-    // three.scene.add(directionLight);
+    three.scene.add(directionLight);
 
 
     if(this.debug){
@@ -1000,26 +982,95 @@ webgl.addDirectionLight = function(){
 };//加平行光
 webgl.addOrbit = function(){
     this.orbit = new THREE.OrbitControls( three.camera , three.renderer.domElement);
-    this.orbit.enableZoom = false;
+    this.orbit.enableZoom = true;
 };//加控制器
 webgl.addEarth = function(){
     var group = new THREE.Group();
-    group.scale.set(0.01,0.01,0.01);
-    group.position.set(0,0,-200)
-    group.rotation.y = 4 * Math.PI
+    group.scale.set(1,1,1);
+    group.position.set(0,50,0)
+    group.rotation.y = 0
+    var material = new THREE.MeshPhongMaterial({
+                        color:0xffffff,
+                        map:three.loadTexture({
+                            url:"assets/models/scene/planet.png",
+                        }),
+                        normalMap:three.loadTexture({
+                            url:"assets/models/scene/normal_planet.png",
+                        }),
+                        shininess:100,
+                        specular:0x888888,
+                        emissive:0x888888,
+                        emissiveIntensity:0.1,
+                    });
+    
+    this.planet.material = material;
 
-    var texture = three.loadTexture({
-        url:this.texturePath + "earth.jpg",
-    });
+    group.add(this.planet)
 
-    var geometry = new THREE.SphereGeometry(20,100,100);
-    var material = new THREE.MeshLambertMaterial({
-        map:texture,
-        wireframe:true,
-    });
+    var material1 = new THREE.MeshPhongMaterial({
+                        map:three.loadTexture({
+                            url:"assets/models/scene/stone1.png",
+                        }),
+                        normalMap:three.loadTexture({
+                            url:"assets/models/scene/normal_stone1.png",
+                        }),
+                        shininess:30,
+                    
+                    });
+        this.stone1.material = material1;
+        three.scene.add(this.stone1)
+        
+    var material2 = new THREE.MeshPhongMaterial({
+                    map:three.loadTexture({
+                        url:"assets/models/scene/stone2.png",
+                    }),
+                    normalMap:three.loadTexture({
+                        url:"assets/models/scene/normal_stone2.png",
+                    }),
+                    shininess:0,
+                });
+    this.stone2.material = material2;
+    three.scene.add(this.stone2)
 
-    var skyMesh = new THREE.Mesh( geometry, material );
-    group.add(skyMesh);
+    var material3 = new THREE.MeshLambertMaterial({
+                    color:"white",
+                    map:three.loadTexture({
+                        url:"assets/models/scene/liusu1.png",
+                    }),
+                    side:THREE.DoubleSide,
+                    transparent:true,
+                   alpha:0.5,
+                   depthWrite:false,
+                });
+    this.liusu_up.material = material3;
+    this.liusu_up.position.set(0,50,0)
+    
+    three.scene.add(this.liusu_up)
+
+    var material4 = new THREE.MeshLambertMaterial({
+                    color:"white",
+                    map:three.loadTexture({
+                        url:"assets/models/scene/liusu1.png",
+                    }),
+                    side:THREE.DoubleSide,
+                   transparent:true,
+                   alpha:0.5,
+                   depthWrite:false,
+                });
+    this.liusu_center.material = material4;
+    this.liusu_center.position.set(0,50,0)
+    three.scene.add(this.liusu_center)
+
+
+    
+    // var geometry = new THREE.SphereGeometry(20,100,100);
+    // var material = new THREE.MeshLambertMaterial({
+    //     map:texture,
+    //     wireframe:true,
+    // });
+
+    // var skyMesh = new THREE.Mesh( geometry, material );
+    // group.add(skyMesh);
 
 
     var geometry = new THREE.SphereGeometry(21,100,100);
@@ -1032,7 +1083,7 @@ webgl.addEarth = function(){
     var cloudMesh = new THREE.Mesh( geometry, material);
     this.cloud = cloudMesh;
 
-    group.add(cloudMesh);
+    // group.add(cloudMesh);
     this.earthGroup = group;
     three.scene.add(group);
 
@@ -1040,7 +1091,7 @@ webgl.addEarth = function(){
         var all = this.PointData;
         var point = all[point];
 
-        var RedPoint = new THREE.Mesh(new THREE.SphereGeometry(1,10,10),new THREE.MeshBasicMaterial({color:0xff0000}))
+        var RedPoint = new THREE.Mesh(new THREE.SphereGeometry(20,10,10),new THREE.MeshBasicMaterial({color:0xff0000}))
         group.add(RedPoint);
         RedPoint.position.set( point.position.x, point.position.y, point.position.z );
         RedPoint.name = point.name;
@@ -1051,18 +1102,24 @@ webgl.addEarth = function(){
 };//加地球
 webgl.addSky = function(){
     var texture = three.loadTexture({
-        url:this.texturePath + "sky2.jpg",
+        url:this.texturePath + "sky.png",
     });
 
+    
+
     // three.scene.background = texture
-    var geometry = new THREE.SphereGeometry(500,50,50);
+    var geometry = new THREE.SphereGeometry(10000,50,50);
     var material = new THREE.MeshLambertMaterial({
         map:texture,
         side:THREE.DoubleSide
     });
 
-    var skyMesh = new THREE.Mesh( geometry, material);
+    // var skyMesh = new THREE.Mesh( geometry, material);
+    var skyMesh = three.getSkyByCubeGeo({
+        size:40960
+    })
     this.sky = skyMesh;
+    skyMesh.position.set(0,0,0)
 
     three.scene.add(skyMesh);
 };//加天空
@@ -1090,9 +1147,9 @@ webgl.updateTexture = function(){
 
 webgl.render = function(){
     // if(this.fps){
-        if(this.debug){
-            this.fps.update();
-        }
+        // if(this.debug){
+        //     this.fps.update();
+        // }
         // this.cloud.rotation.x+=0.0002;
         // this.cloud.rotation.y+=0.0002;
         // this.cloud.rotation.z+=0.0002;
@@ -1152,7 +1209,12 @@ var main = new function(){
     this.textureUrl = "assets/models/"
     this.ImageList = [
         this.picUrl+"phone.png",
-        this.textureUrl+"planet/planet.png",
+        this.textureUrl+"scene/planet.png",
+        this.textureUrl+"scene/normal_planet.png",
+        this.textureUrl+"scene/stone1.png",
+        this.textureUrl+"scene/normal_stone1.png",
+        this.textureUrl+"scene/stone2.png",
+        this.textureUrl+"scene/normal_stone2.png",
     ];
     this.RAF = undefined;
 
@@ -1245,20 +1307,21 @@ main.TranslateBg = function(){
     // },3000)
 };
 main.loadCallBack = function(){
+    webgl.loadCallback();
     vm.ploading.visible = false;
     $(".bg1").fo();
     $(".bg2").fi();
-    // vm.pwebgl.visible = true;
-    // this.startRender();
+    vm.pwebgl.visible = true;
+    this.startRender();
 
     // vm.pshare.visible = true;
     // vm.pend.visible = true;
     // vm.pguanzhu.visible = true;
     // vm.pfill.visible = true;
-    vm.palert.visible = true;
-    var type = vm.palert.choice.fill; 
-    var content = vm.palert.txt[type];
-    vm.palert.content = "你还未填写领奖信息，赶快去填写吧"
+
+    // var type = vm.palert.choice.fill;
+    // var content = vm.palert.txt[type];
+    // vm.openAlert( type, content );
 
 
 
@@ -1279,7 +1342,7 @@ main.prule = function(){
     $(".P_rule").fi();
     main.scrollInit(".rule-txt",0)
 };
-main.prulelaeve = function(){
+main.pruleleave = function(){
     $(".P_rule").fo(function(){
         $(".rule-txt")[0].style.webkitTransform="translate3d(0,0,0)";
     });
@@ -1343,12 +1406,14 @@ main.addEvent=function(){
         }
     });
 
-    $(".btn").on({
+    $(".long-press").on({
         touchstart:function(e){
             e.preventDefault();
             // TweenMax.to(webgl.earthGroup.rotation,1,{x:Math.PI/6,y:Math.PI/6,z:Math.PI/6,ease:"Power2.easeOut"})
 
-            var camera_pos = new THREE.Vector3().copy(three.camera.position);//球心与相机连线向量
+            var camera_pos = new THREE.Vector3().copy(three.camera.position);
+            
+            //球心与相机连线向量
             var min_distance = undefined;//最近的点与相机的距离，用点的世界坐标
             var min_obj = undefined;//最近的点的mesh
 
@@ -1373,7 +1438,9 @@ main.addEvent=function(){
 
 
             var vec_pointPos = new THREE.Vector3().copy(min_obj.getWorldPosition())//球心到红点方向向量
+            vec_pointPos.y-=50;
             var vec_rotate = new THREE.Vector3().copy(camera_pos);//球心与相机连线的方向向量
+            vec_rotate.y-=50;
 
             angle = vec_pointPos.angleTo( vec_rotate )//向量夹角
             vec_rotate.cross(vec_pointPos).normalize();//旋转轴的单位法向量

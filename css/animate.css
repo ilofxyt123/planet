@@ -271,3 +271,35 @@
     -webkit-animation:ani-bg 45s linear 0s 1 forwards;
     animation:ani-bg 45s linear 0s 1 forwards;
 }
+
+@-webkit-keyframes ani-toBig {
+    0%{
+        -webkit-transform:scale(0);
+    }
+    100% {
+        -webkit-transform:scale(1);
+    }
+}
+
+
+.ani-toBig{
+    -webkit-animation:ani-toBig 0.3s linear 0s 1 forwards;
+    animation:ani-toBig 0.3s linear 0s 1 forwards;
+}
+
+@-webkit-keyframes ani-arrow {
+    0%{
+        -webkit-transform:translateY(-0.2rem);
+        opacity:0;
+    }
+    100% {
+        -webkit-transform:translateY(0.1rem);
+        opacity:1;
+    }
+}
+
+
+.ani-arrow{
+    -webkit-animation:ani-arrow 1.3s ease-Out 0s infinite forwards;
+    animation:ani-arrow 1.3s ease-Out 0s infinite forwards;
+}

@@ -159,6 +159,136 @@ $.fn.extend({
         return this;
     }
 });
+function Scroll(obj){
+    this.$container = $(obj.container);//外层容器
+    this.$scrollObj = $(obj.scrollObj);
+
+    this.visibleWidth  = parseFloat(this.$container.css("width"));
+    this.visibleHeight = parseFloat(this.$container.css("height"));
+
+    this.scrollWidth = parseFloat(this.$scrollObj.css("width"));
+    this.scrollHeight = parseFloat(this.$scrollObj.css("height"));
+
+    this.newY = 0;
+    this.lastY = 0;
+    this.deltaY = 0;
+    this.scrollY = 0;//当前的位置
+    this.limitY = 0;//边界
+    this.overlimitY = 0;//超出的距离
+    this.slideK = 1;
+
+    this.startTime = 0;
+    this.offsetTime = 0;
+
+    this.isBottom = false;
+    this.refresh = obj.refresh ? obj.refresh : undefined;
+    this.isRefreshing = false;//正在刷新
+    this.preloader;//加载器ui
+    if(this.refresh){
+        this.preloader = this.$container.find(".scroll-preloader");
+        this.preloader.remove();
+        this.refresh();
+    }
+    // this.refreshDistance = obj.refreshDistance ? obj.refreshDistance : 50
+
+    this.init();
+}
+$.extend(Scroll.prototype,{//是否深度合并，二级同名对象进行合并，而不是简单覆盖
+    init:function(){
+        this.newY = 0;
+        this.lastY = 0;
+        this.deltaY = 0;
+        this.scrollY = 0;
+
+        this.update();
+
+        if(this.scrollY == this.limitY){
+            this.isBottom = true;
+        }
+
+        this.bindEvent();
+    },
+    update:function(){//重新计算limitY
+        this.visibleWidth  = parseFloat(this.$container.css("width"));
+        this.visibleHeight = parseFloat(this.$container.css("height"));
+
+        this.scrollWidth = parseFloat(this.$scrollObj.css("width"));
+        this.scrollHeight = parseFloat(this.$scrollObj.css("height"));
+
+        this.limitY = (this.scrollHeight > this.visibleHeight) ? -(this.scrollHeight - this.visibleHeight) : 0;
+
+        var paddingTop = parseFloat(this.$container.css("paddingTop"));
+        var paddingBottom = parseFloat(this.$container.css("paddingBottom"));
+        this.limitY -= (paddingTop+paddingBottom)
+    },
+    set:function(number){
+        this.scrollY = number;
+        this.$scrollObj[0].style.webkitTransform="translate3d(0,"+this.scrollY+"px,0)";
+    },
+    bindEvent:function(){
+        this.$container.on({
+            touchstart:this.onTouchstart.bind(this),
+            touchmove:this.onTouchmove.bind(this),
+            touchend:this.onTouchend.bind(this),
+        })
+    },
+    onTouchstart:function(e){
+        e.stopPropagation();
+        this.newY = e.originalEvent.changedTouches[0].pageY;
+        this.lastY = this.newY;
+        this.startTime = new Date().getTime();
+    },
+    onTouchmove:function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        this.offsetTime = new Date().getTime() - this.startTime;
+
+        this.newY = e.originalEvent.changedTouches[0].pageY;
+        this.deltaY = this.newY - this.lastY;//touch变化量
+
+
+        if(this.scrollY + this.deltaY < 0){//上边界限制
+            if(this.scrollY + this.deltaY > this.limitY){//下边界限制
+                this.scrollY += this.deltaY * this.slideK;
+            }
+            else{//超出,滑动系数逐渐减小
+                this.scrollY = this.limitY
+                if(this.refresh && !this.isRefreshing){
+                    this.processRefresh();
+                }
+            }
+
+        }else{
+            this.scrollY = 0;
+        }
+
+        this.$scrollObj[0].style.webkitTransform="translate3d(0,"+this.scrollY+"px,0)";
+
+
+
+        //得到deltaY,处理业务
+
+        this.lastY = this.newY;
+    },
+    onTouchend:function(e){
+        e.stopPropagation();
+        this.offsetTime = new Date().getTime() - this.startTime;
+    },
+
+    processRefresh:function(){
+        this.isRefreshing = true;
+        // this.$scrollObj.append(this.preloader);
+        // this.preloader.show();
+        this.refresh();
+    },
+    onTransitionEndToBottom:function(){
+        console.log("1")
+        this.isBottom = false;
+        this.scrollY = this.limitY;
+        this.slideK = 2;
+        this.$scrollObj.off("webkitTransitionEnd");
+    },
+});
 var Utils = new function(){
     this.preloadImage = function(ImageURL,callback,realLoading){
         var rd = realLoading||false;
@@ -170,7 +300,7 @@ var Utils = new function(){
                     main.loader.haveLoad +=1;
                     var num = Math.ceil(main.loader.haveLoad / main.loader.total * 100);
                     if(rd){
-                        $num.html(num+"%");
+                        $num.html(num);
                     }
                     if (main.loader.haveLoad == main.loader.total) {
                             callback && callback()
@@ -183,6 +313,20 @@ var Utils = new function(){
             }(new Image(), ImageURL[i]));
         }
     },//图片列表,图片加载完后回调函数，是否需要显示百分比
+    this.preloadImage2 = function(ImageURL,callback){
+            var i,j,haveLoaded = 0;
+            for(i = 0,j = ImageURL.length;i<j;i++){
+                (function(img, src) {
+                    img.onload = function() {
+                        haveLoaded+=1;
+                        if (haveLoaded == ImageURL.length && callback) {
+                            callback();
+                        }
+                    };
+                    img.src = src;
+                }(new Image(), ImageURL[i]));
+            }
+        },//图片列表,图片加载完后回调函数，是否需要显示百分比
     this.lazyLoad = function(){
         var a = $(".lazy");
         var len = a.length;
@@ -297,6 +441,7 @@ var options = {
             isVip : !!parseInt($("#is_vip").val()),//是否注册过
             goRegist : !!parseInt($("#goRegist").val()),//出去注册了一下
             haveFill : !!parseInt($("#haveFill").val()),//是否填写过中奖信息
+            prizeType:parseInt($("#prizeType").val()),//奖品类型
             province:[
                 // {province:"江西省"},
                 // {province:"浙江省"},
@@ -319,8 +464,18 @@ var options = {
             select_city:'',
             select_address:'',
             shop_id:0,
+            myInfo:{
+                province:"",
+                city:"",
+                shop:"",
+            },
+            gameData:{
+                hlbe:false,
+                spanish:false,
+                wz:false,
+            }
         },
-
+        ios:Utils.browser("ios"),
         /*页面切换控制*/
         ploading:{
             visible:false,
@@ -332,6 +487,9 @@ var options = {
             visible:false,
         },
         p2:{
+            visible:false,
+        },
+        pprize:{
             visible:false,
         },
         pfill:{
@@ -364,11 +522,13 @@ var options = {
             choice:{
                 fill:"fill",
                 normal:"normal",
+                reg:"reg"
             },
             content:"",//主文字
             title:"",//标题
             txt: {
                 fill:"你还未填写领奖信息，赶快去填写吧",
+                reg:"为了确保星球领奖者的真实性,<br>系统需要进行实名认证,<br>请填写个人真实信息领取奖品!"
             }
         },
         hpwarn:{
@@ -380,10 +540,50 @@ var options = {
         /*页面切换控制*/
     },
     methods:{
+                                                        /*活动规则*/
+        top_btn_rule:function(){
+            this.prule.visible = true;
+            if(!main.scroll){
+                main.scroll = new Scroll({
+                    container:".scroll-area",
+                    scrollObj:".scroller"
+                })
+            }
+        },
+        after_leave_rule:function(){
+            main.scroll.set( 0 );
+        },
+        after_enter_rule:function(){
+            main.scroll.update();
+        },
+
                                                         /*webgl*/
         pwegbl_btn_chaxun:function(){
             this.pquery.visible = true;
         },
+               
+                                                        /*中奖结果页*/
+        pprize_btn_paddress:function(){
+            this.paddress.visible = true;
+        },/*中奖结果页*/
+        pprize_btn_share:function(){
+            this.pshare.visible = true;
+        },
+        pprize_btn_pfill:function(){
+            this.pfill.visible = true;
+            this.pprize.visible = false;
+        },
+                                                        /*中奖查询页*/
+        pquery_btn_paddress:function(){
+            this.paddress.visible = true;
+        },
+        pquery_btn_share:function(){
+            this.pshare.visible = true;
+        },
+        pquery_btn_xx:function(){
+            this.pquery.visible = false;
+        },
+
                                                         /*提交信息页*/
         pfill_btn_submit:function(){
             var number = this.server_data.tel;
@@ -451,6 +651,16 @@ var options = {
                 this.router.splice(len-1,1)
             }
         },
+
+                                                        /*alert页面*/
+        palert_btn_gofill:function(){
+            this.pfill.visible = true;
+            this.closeAlert();
+        },
+        palert_btn_goregist:function(){
+            // window.location.href = "";
+            console.log("前往注册");
+        },
         openAlert:function(type,content){
             this.palert.type = type;
             this.palert.content = content;
@@ -460,7 +670,6 @@ var options = {
             this.palert.visible = false;
             this.palert.type = "";
             this.palert.content = "";
-
         },
     },
     delimiters: ['$[', ']']
@@ -488,13 +697,17 @@ three.init = function(){
     this.camera.position.y = 50;
     this.camera.position.z = 1600;
 
+    this.ocamera = new THREE.OrthographicCamera(-this.width/2,this.width/2,this.height/2,-this.height/2,1,1000);
+    this.ocamera.position.y = 50;
+    this.ocamera.position.z = 5;
+    this.scene2 = new THREE.Scene();
+
 
     this.renderer = new THREE.WebGLRenderer({antialias:true});
     // this.renderer.setPixelRatio(window.devicePixelRatio);//移动端为了性能，关闭此功能
     this.renderer.setSize(this.width,this.height);
     // this.renderer.setClearColor(0x000000,1);
     this.renderer.autoClear = false;
-    this.renderer.autoClearDepth =false;
     this.container.append(this.renderer.domElement);
 
     this.raycaster = new THREE.Raycaster();
@@ -545,7 +758,7 @@ three.loadOBJ = function(config){
 
         main.loader.haveLoad++;
         var completePercent = Math.round(main.loader.haveLoad/main.loader.total*100);
-        $(".num").html(completePercent+"%")
+        $(".num").html(completePercent)
         if(main.loader.haveLoad == main.loader.total ){     
                 main.loadCallBack();          
         }
@@ -661,17 +874,17 @@ three.getSkyByCubeGeo = function(config){
     config.size = config.size ? config.size : 1024;
     config.format = config.format ? config.format : ".jpg";
     config.urls = config.urls ? config.urls : [
-        path+"right"+config.format,
-        path+"left"+config.format,
-        path+"up"+config.format,
-        path+"down"+config.format,
-        path+"front"+config.format,
-        path+"back"+config.format,
+        path+"right"+config.format+"?v"+config.version,
+        path+"left"+config.format+"?v"+config.version,
+        path+"up"+config.format+"?v"+config.version,
+        path+"down"+config.format+"?v"+config.version,
+        path+"front"+config.format+"?v"+config.version,
+        path+"back"+config.format+"?v"+config.version,
     ];
 
     var materials = [];
     for(var i = 0;i<config.urls.length;i++){
-        materials.push(new THREE.MeshBasicMaterial({
+        materials.push(new THREE.MeshLambertMaterial({
             map:this.loadTexture({url:config.urls[i]}),
             side:THREE.BackSide
         }))
@@ -802,7 +1015,10 @@ three.getTouchCoords = function(event){
 };//传入touch回调参数,return{x:0,y:0}
 
 three.render = function(){
+    this.renderer.clear()
     this.renderer.render(this.scene,this.camera);
+    this.renderer.clearDepth();
+    this.renderer.render(this.scene2,this.ocamera);
 };
 three.onresize = function(){
     this.width = this.container.width();
@@ -810,6 +1026,12 @@ three.onresize = function(){
 
     this.camera.aspect = this.width/this.height;
     this.camera.updateProjectionMatrix();
+    
+    this.ocamera.left = -this.width/2;
+    this.ocamera.right = this.width/2;
+    this.ocamera.top = this.height/2;
+    this.ocamera.bottom = -this.height/2;
+    this.ocamera.updateProjectionMatrix();
 
     this.renderer.setSize(this.width,this.height);
 };
@@ -861,25 +1083,27 @@ var webgl = new function(){
 
     };
 
-    
-
-
     const SQ3 = Math.sqrt(3);
     const SQ2 = Math.sqrt(2);
 
     //点位信息
     this.PointData = {
-        point1:{
-            name:"point1",
+        hlbe:{
+            name:"hlbe",
+            texture:"",
             position:new THREE.Vector3(300,0,0),
             obj:undefined,
+            frames:"hlbe"
         },
-        point2:{
-            name:"point2",
+        spanish:{
+            name:"spanish",
+            texture:"",
             position:new THREE.Vector3(300/SQ3,300/SQ3,300/SQ3),
             obj:undefined,
+            frames:"spanish"
         }
     };
+    this.currentPointName = "";
 
     //背景天空
     this.sky = undefined;
@@ -896,7 +1120,6 @@ var webgl = new function(){
     //切换到第几张纹理
     this.textureIndex = 0;
 
-
     //纹理路径
     this.texturePath = "assets/images/";
     //时钟
@@ -904,19 +1127,6 @@ var webgl = new function(){
 };
 webgl.init = function(){
     this.loader.total = Object.keys(this.OBJData).length;
-    for(var i=0;i<3;i++){
-        var texture = three.loadTexture({
-                            url:this.texturePath + "cloud"+[i] +".png"
-                        })
-
-        this.earthChangeTexture.push(texture)
-    }
-
-    
-
-
-
-
 };
 webgl.load = function(){
     for(var prop in this.OBJData){
@@ -945,14 +1155,23 @@ webgl.load = function(){
 
 };
 webgl.loadCallback = function(){
-    // if(this.debug){
-    //     this.addFps();
-    // }
+    if(this.debug){
+        this.addFps();
+    }
+    for(var i=1;i<=75;i++){
+        var texture = three.loadTexture({
+                            url:main.modelsUrl+"scene/ls/"+i+".png"
+                        })
+
+        this.earthChangeTexture.push(texture)
+    }
     this.addAmbientLight();//加环境光
     this.addDirectionLight();//加方向光
-    this.addOrbit();//加控制器
     this.addEarth();//加地球
     this.addSky();//加天空
+    this.addCross();
+    this.addOrbit();//加控制器
+    this.addGravity();
     // if(this.debug){
     //     this.addAxisHelper();//增加坐标轴辅助线
     // }
@@ -976,19 +1195,23 @@ webgl.addDirectionLight = function(){
 
     if(this.debug){
         var helper = new THREE.DirectionalLightHelper(directionLight)
-        three.scene.add(helper)
+        // three.scene.add(helper)
     }
 
 };//加平行光
 webgl.addOrbit = function(){
     this.orbit = new THREE.OrbitControls( three.camera , three.renderer.domElement);
     this.orbit.enableZoom = true;
+    this.orbit.target = webgl.earthGroup.position;
 };//加控制器
+webgl.addGravity = function(){
+    this.gravity = new THREE.DeviceOrientationControls(this.sky)
+};
 webgl.addEarth = function(){
     var group = new THREE.Group();
-    group.scale.set(1,1,1);
-    group.position.set(0,50,0)
-    group.rotation.y = 0
+    group.scale.set(0,0,0);
+    group.position.set(0,50,-200)
+    group.rotation.y = 4*Math.PI
     var material = new THREE.MeshPhongMaterial({
                         color:0xffffff,
                         map:three.loadTexture({
@@ -1035,53 +1258,31 @@ webgl.addEarth = function(){
     var material3 = new THREE.MeshLambertMaterial({
                     color:"white",
                     map:three.loadTexture({
-                        url:"assets/models/scene/liusu1.png",
+                        url:"assets/models/scene/ls/1.png",
                     }),
                     side:THREE.DoubleSide,
-                    transparent:true,
-                   alpha:0.5,
                    depthWrite:false,
+                   transparent:true,
+                   opacity:0.6
                 });
     this.liusu_up.material = material3;
-    this.liusu_up.position.set(0,50,0)
-    
-    three.scene.add(this.liusu_up)
+    this.liusu_up.scale.set(1.01,1.01,1.01)
+    group.add(this.liusu_up)
 
     var material4 = new THREE.MeshLambertMaterial({
                     color:"white",
                     map:three.loadTexture({
-                        url:"assets/models/scene/liusu1.png",
+                        url:"assets/models/scene/ls/1.png",
                     }),
                     side:THREE.DoubleSide,
-                   transparent:true,
-                   alpha:0.5,
                    depthWrite:false,
+                   transparent:true,
+                   opacity:0.6
                 });
     this.liusu_center.material = material4;
-    this.liusu_center.position.set(0,50,0)
-    three.scene.add(this.liusu_center)
+    this.liusu_center.scale.set(1.01,1.01,1.01)
+    group.add(this.liusu_center)
 
-
-    
-    // var geometry = new THREE.SphereGeometry(20,100,100);
-    // var material = new THREE.MeshLambertMaterial({
-    //     map:texture,
-    //     wireframe:true,
-    // });
-
-    // var skyMesh = new THREE.Mesh( geometry, material );
-    // group.add(skyMesh);
-
-
-    var geometry = new THREE.SphereGeometry(21,100,100);
-    var material = new THREE.MeshLambertMaterial({
-        transparent:true,
-        map:this.earthChangeTexture[0],
-    });
-
-
-    var cloudMesh = new THREE.Mesh( geometry, material);
-    this.cloud = cloudMesh;
 
     // group.add(cloudMesh);
     this.earthGroup = group;
@@ -1101,28 +1302,40 @@ webgl.addEarth = function(){
 
 };//加地球
 webgl.addSky = function(){
-    var texture = three.loadTexture({
-        url:this.texturePath + "sky.png",
-    });
-
-    
-
-    // three.scene.background = texture
-    var geometry = new THREE.SphereGeometry(10000,50,50);
-    var material = new THREE.MeshLambertMaterial({
-        map:texture,
-        side:THREE.DoubleSide
-    });
-
-    // var skyMesh = new THREE.Mesh( geometry, material);
     var skyMesh = three.getSkyByCubeGeo({
-        size:40960
+        size:40960,
+        version:5
     })
     this.sky = skyMesh;
-    skyMesh.position.set(0,0,0)
 
     three.scene.add(skyMesh);
+
+    // var texture = three.loadTexture({
+    //     url:main.picUrl+"sky.jpg"
+    // })
+    // var sky = three.getSkyBySphere({
+    //     R:4096,
+    //     Ws:8,
+    //     Hs:8,
+    //     texture:texture
+    // })
+    // this.sky = sky
+    // three.scene.add( sky );
+
 };//加天空
+webgl.addCross = function(){
+    var texture = three.loadTexture({
+        url:main.picUrl + "p1-miaozhun.png",
+    })
+    var material = new THREE.SpriteMaterial({
+        map:texture
+    })
+    var sprite = new THREE.Sprite( material );
+    sprite.position.set(0,50,0)
+    sprite.scale.set(60,60,60)
+    three.scene2.add(sprite)
+
+};//加准心
 
 webgl.addFps = function(){
     this.fps = three.getFps();
@@ -1133,10 +1346,21 @@ webgl.addAxisHelper = function(){
     three.scene.add(helper);
 };
 webgl.updateTexture = function(){
-    var index = this.textureIndex;
-    var textures = this.earthChangeTexture;
-    this.cloud.material.map = textures[index];
-    if(index<textures.length-1){
+    this.liusu_center.material.map = this.earthChangeTexture[this.textureIndex];
+    this.liusu_up.material.map = this.earthChangeTexture[this.textureIndex];
+    this.liusu_center.material.needsUpdate = true;
+    this.liusu_up.material.needsUpdate = true;  
+
+    this.liusu_center.rotation.x+=0.002;
+    this.liusu_center.rotation.y+=0.002;
+    this.liusu_center.rotation.z+=0.002;
+
+    this.liusu_up.rotation.x+=0.002;
+    this.liusu_up.rotation.y+=0.002;
+    this.liusu_up.rotation.z+=0.002;
+
+
+    if(this.textureIndex<this.earthChangeTexture.length-1){
         this.textureIndex++;
     }else{
         this.textureIndex = 0;
@@ -1144,26 +1368,113 @@ webgl.updateTexture = function(){
 
 
 };
+webgl.rotateToCenter = function(){
+    var camera_pos = new THREE.Vector3().copy( three.camera.position );
+            
+    var min_distance = undefined;//最近的点与相机的距离，用点的世界坐标
+    var min_obj = undefined;//最近的点的mesh
+
+    var angle = undefined;//两个向量夹角
+
+    for(var prop in this.PointData){//遍历点，找到最近的点
+        var obj = this.PointData[prop].obj;
+        var distance = obj.getWorldPosition().distanceTo(camera_pos)
+        if(!min_distance){
+            min_distance = distance;
+            min_obj = obj;//最近的点
+            this.currentPointName = this.PointData[prop].name;
+        }
+        else{
+            if(distance < min_distance){
+                min_distance = distance;
+                min_obj = obj;//最近的点
+                this.currentPointName = this.PointData[prop].name;
+            }
+        }
+    }
+
+
+    var pointPos = new THREE.Vector3().copy(min_obj.getWorldPosition())//球心到红点方向向量
+   
+    var PointToOVec = new THREE.Vector3().subVectors( pointPos, this.earthGroup.position )
+    var CameraToOvec = new THREE.Vector3().subVectors( camera_pos, this.earthGroup.position )
+
+    angle = PointToOVec.angleTo( CameraToOvec )//向量夹角
+    var RotateVec = new THREE.Vector3().copy( PointToOVec );
+    RotateVec.cross( CameraToOvec ).normalize();//旋转轴的单位法向量
+
+    var q1 = new THREE.Quaternion().setFromAxisAngle( RotateVec, angle )//变换quaternion
+    var q2 = new THREE.Quaternion();
+    q2.copy( this.earthGroup.quaternion );//得到球体初始quaternion
+    q1.multiply( q2 );//算出终点quaternion
+
+    var new_quaternion = new THREE.Quaternion();
+
+    var obj = { t : 0 };
+    TweenMax.to( obj, 1,{ t:1,onUpdate:function(){
+        THREE.Quaternion.slerp( q2, q1, new_quaternion,obj.t);
+        webgl.earthGroup.quaternion.set( new_quaternion.x, new_quaternion.y, new_quaternion.z, new_quaternion.w)
+    },onComplete:function(){
+        if(main.touch.isTouch){
+            main.stage = 2;
+            main.player1.direction = 1;
+            if(vm.ios){
+                main.player1.repeat = 1;
+                main.player1.callback1 = function(){
+                    main.stage = 3;
+                    $(main.frames[webgl.currentPointName].video).show();
+                    $("#player1").fo();
+                    main.frames[webgl.currentPointName].video.play();
+                };
+            }else{//安卓
+                var callback1 = function(){
+                    main.stage = 3;
+                    $("#player1").fo();
+                    $("#player2").show();
+                    main.player2.init( main.frames[webgl.currentPointName].urls )
+                    main.player2.loop = true;
+                    main.player2.play();
+                }
+                main.player1.callback1 = callback1;
+                if(!main.frames[webgl.currentPointName].load_complete){//图片没加载过
+                    main.player1.loop = true;
+                    main.loadFrames( main.frames[webgl.currentPointName], function(){
+                        main.player1.repeat = 1;
+                    })
+                }else{
+                    main.player1.repeat = 1;
+                }
+            }
+            
+            $("#player1").show()
+            $(".player-container").fi();
+            main.player1.play();
+            main.stopRender();
+            
+        }
+    }})
+};
 
 webgl.render = function(){
     // if(this.fps){
-        // if(this.debug){
-        //     this.fps.update();
-        // }
-        // this.cloud.rotation.x+=0.0002;
-        // this.cloud.rotation.y+=0.0002;
-        // this.cloud.rotation.z+=0.0002;
+        if(this.debug){
+            this.fps.update();
+        }
+        
 
         // this.sky.rotation.y += 0.0002;
         // if( this.clock.getDelta() > 17){
         //     // this.updateTexture();
         // }
         this.clock.startTime = Date.now();
-        // if(this.clock.startTime - this.clock.oldTime >5000){
-        //    this.updateTexture();
-        //    this.clock.oldTime = this.clock.startTime;
+        if(this.clock.startTime - this.clock.oldTime >30){
+           this.updateTexture();
+           this.clock.oldTime = this.clock.startTime;
+        }
+        // if(this.gravity){
+        //     this.gravity.update();
         // }
-
+        
     // }
 };
 
@@ -1190,6 +1501,7 @@ var main = new function(){
         delta_angle:0,
         time:0,
         offsetTime:0,
+        isTouch:false,
     };
 
     this.bgm ={
@@ -1206,16 +1518,26 @@ var main = new function(){
     };
 
     this.picUrl = "assets/images/";//图片路径
-    this.textureUrl = "assets/models/"
+    this.modelsUrl = "assets/models/";//模型基础路径
+    this.videoUrl = "video/";//视频序列帧路径
     this.ImageList = [
         this.picUrl+"phone.png",
-        this.textureUrl+"scene/planet.png",
-        this.textureUrl+"scene/normal_planet.png",
-        this.textureUrl+"scene/stone1.png",
-        this.textureUrl+"scene/normal_stone1.png",
-        this.textureUrl+"scene/stone2.png",
-        this.textureUrl+"scene/normal_stone2.png",
+        this.modelsUrl+"scene/planet.png",
+        this.modelsUrl+"scene/normal_planet.png",
+        this.modelsUrl+"scene/stone1.png",
+        this.modelsUrl+"scene/normal_stone1.png",
+        this.modelsUrl+"scene/stone2.png",
+        this.modelsUrl+"scene/normal_stone2.png",
     ];
+    this.clouds = [];
+    for(var i=1;i<=75;i++){
+        this.ImageList.push(this.modelsUrl+"scene/ls/"+i+".png")
+    }
+    
+    for(var i=1;i<=33;i++){
+        this.clouds.push(this.picUrl+"cloud/"+i+".jpg");
+    }
+    this.ImageList = new Array().concat(this.ImageList,this.clouds)
     this.RAF = undefined;
 
     this.loader = {
@@ -1225,6 +1547,37 @@ var main = new function(){
     };
 
     this.orient = undefined;
+    this.scroll = undefined;
+    this.player1 = undefined;//云的播放器
+    this.player2 = undefined;//视频播放器
+
+    this.frames = {
+        hlbe:{
+            urls:[],
+            load_complete:false,
+            video:$("#video1")[0]
+        },
+        spanish:{
+            urls:[],
+            load_complete:false,
+            video:$("#video2")[0]
+        },
+        wz:{
+            urls:[],
+            load_complete:false,
+            video:$("#video3")[0]
+        }
+    }
+
+    for(var i=1;i<=458;i++){
+        this.frames.hlbe.urls.push(this.videoUrl+"hlbe/"+i+".jpg");
+    }
+    for(var i=1;i<=460;i++){
+        this.frames.spanish.urls.push(this.videoUrl+"spanish/"+i+".jpg");
+    }
+
+    this.stage = 1;//当前阶段1
+    
 };
 main.init=function(){
     // this.TranslateBg();
@@ -1243,6 +1596,7 @@ main.start=function(){
         main.loadCallBack();
     },true);
     webgl.load();
+
 };
 main.TranslateBg = function(){
     var config = {
@@ -1311,32 +1665,79 @@ main.loadCallBack = function(){
     vm.ploading.visible = false;
     $(".bg1").fo();
     $(".bg2").fi();
-    vm.pwebgl.visible = true;
-    this.startRender();
+    $(".rule").show();
+    for(var i = 0;i<this.clouds.length;i++){
+        var img = new Image();
+        img.src = this.clouds[i];
+        this.clouds[i] = img;
+    }
+    this.player1 = new Player("player1");
+    this.player1.init(this.clouds);
+    this.player1.callback2 = function(){//退出过度动画后重新开始回调 + 清理当前点的名字
+        main.startRender();
+        main.stage = 1;
+        $(".player-container").fo(function(){
+            $("#player1").hide();
+            webgl.currentPointName ="";
+        });
+        
+    };
+    if(!vm.ios){
+        main.player2 = new Player("player2")
+    }
+    if(!vm.server_data.haveFill){
+        var type = vm.palert.choice.fill;
+        var content = vm.palert.txt[type];
+        vm.openAlert( type, content );
+        return;
+    }
+    // vm.pwebgl.visible = true;
+    // this.startRender();
 
     // vm.pshare.visible = true;
     // vm.pend.visible = true;
     // vm.pguanzhu.visible = true;
     // vm.pfill.visible = true;
+    // vm.paddress.visible = true;
 
-    // var type = vm.palert.choice.fill;
-    // var content = vm.palert.txt[type];
-    // vm.openAlert( type, content );
+    // _getData.getPrize(function( data ){
+    //     if( data.status ){
+    //         vm.pprize.visible = true;
+    //         vm.server_data.prizeType = data.data;
+    //     }
+        
+    // })
 
+    // vm.pquery.visible = true;
+
+        var type = vm.palert.choice.reg;
+        var content = vm.palert.txt[type];
+        vm.openAlert( type, content );
 
 
     main.addEvent();
-// setTimeout(function(){
-//     TweenMax.to(webgl.earthGroup.position,4,{x:0,y:0,z:0,ease:"Linear.easeNone"})
-//     TweenMax.to(webgl.earthGroup.scale,4,{x:1,y:1,z:1,ease:"Linear.easeNone"})
-//     TweenMax.to(webgl.earthGroup.rotation,4,{x:0,y:2 * Math.PI,z:0,ease:"Linear.easeNone",onComplete:function(){
-//         TweenMax.to(webgl.earthGroup.rotation,6,{x:0,y:0,z:0,ease:"Power2.easeOut"})
-//     }})
-// },2000)
-
-
-
+    setTimeout(function(){
+        TweenLite.to(webgl.earthGroup.position,4,{x:0,y:50,z:0,ease:"Linear.easeNone"})
+        TweenLite.to(webgl.earthGroup.scale,4,{x:1,y:1,z:1,ease:"Linear.easeNone"})
+        // TweenMax.to(three.camera.rotation,4,{x:0,y:0,z:0,ease:"Linear.easeNone"})
+        TweenLite.to(webgl.earthGroup.rotation,4,{x:0,y:2 * Math.PI,z:0,ease:"Linear.easeNone",onComplete:function(){
+            TweenLite.to(webgl.earthGroup.rotation,6,{x:0,y:0,z:0,ease:"Power2.easeOut"})
+        }})
+    },2000)
 };
+main.loadFrames = function( object, callback){
+    var urls = object.urls;
+    var len = urls.length;
+    Utils.preloadImage2(urls,function(){
+        object.load_complete = true;
+        for(var i=0;i<len;i++){
+            var img = new Image();
+            img.src = urls[i];
+            urls[i] = img;
+        }
+        callback();
+    });
+}
 
 main.prule = function(){
     $(".P_rule").fi();
@@ -1388,6 +1789,7 @@ main.startRender = function(){
 main.stopRender = function(){
     window.cancelAnimationFrame(main.RAF);
 };
+
 main.addEvent=function(){
     document.body.ontouchmove = function(e){
         e.preventDefault();
@@ -1406,72 +1808,102 @@ main.addEvent=function(){
         }
     });
 
+    var Stage2ToStage1 = function(){
+        main.player1.direction = -1;
+        main.player1.repeat = 1;
+    };
+    var Stage3ToStage2 = function(){
+        main.stage = 2;
+        if( vm.ios ){
+            main.frames[webgl.currentPointName].video.pause()
+            main.frames[webgl.currentPointName].video.currentTime = 0;
+            $("#player1").show();
+            $(main.frames[webgl.currentPointName].video).hide();
+        }else{
+            $("#player2").hide();
+            main.player2.pause();
+            main.player2.set( 0 );
+            $("#player1").show();
+        }
+
+        main.player1.direction = -1;
+        main.player1.repeat = 2;
+        main.player1.set( main.player1.framesLength-1 );
+        main.player1.play();
+        $("#player1").show();
+    };
+    var Stage2ToStage3 = function(){
+        if( vm.ios ){
+            main.player1.direction = 1;
+            main.player1.repeat = 1;  
+        }else{
+            main.player1.direction = 1;
+            if( !main.frames[webgl.currentPointName].load_complete ){
+                main.player1.loop = true;
+            }else{
+                main.player1.repeat = 1;
+            }
+        }
+    };
+
     $(".long-press").on({
         touchstart:function(e){
             e.preventDefault();
-            // TweenMax.to(webgl.earthGroup.rotation,1,{x:Math.PI/6,y:Math.PI/6,z:Math.PI/6,ease:"Power2.easeOut"})
-
-            var camera_pos = new THREE.Vector3().copy(three.camera.position);
-            
-            //球心与相机连线向量
-            var min_distance = undefined;//最近的点与相机的距离，用点的世界坐标
-            var min_obj = undefined;//最近的点的mesh
-
-            var angle = undefined;//两个向量夹角
-
-            for(var prop in webgl.PointData){//遍历点，找到最近的点
-                var obj = webgl.PointData[prop].obj;
-                if(!min_distance){
-                    min_distance = obj.getWorldPosition().distanceTo(camera_pos);
-                    min_obj = obj;//最近的点
-                }
-                else{
-                    if(obj.getWorldPosition().distanceTo(camera_pos) < min_distance){
-                        min_distance = obj.getWorldPosition().distanceTo(camera_pos);
-                        min_obj = obj;//最近的点
-                    }
-                }
+            main.touch.isTouch = true;
+            switch( main.stage ){
+                case 1:
+                    break;
+                case 2:
+                    Stage2ToStage3();
+                    return;
+                    break;   
             }
+            // if(!main.player1.paused){
+            //     main.player1.loop = true;
+            //     main.player1.direction = 1;
+            //     return;
+            // }
 
-            // console.log(min_distance)
-            // console.log(min_obj)
-
-
-            var vec_pointPos = new THREE.Vector3().copy(min_obj.getWorldPosition())//球心到红点方向向量
-            vec_pointPos.y-=50;
-            var vec_rotate = new THREE.Vector3().copy(camera_pos);//球心与相机连线的方向向量
-            vec_rotate.y-=50;
-
-            angle = vec_pointPos.angleTo( vec_rotate )//向量夹角
-            vec_rotate.cross(vec_pointPos).normalize();//旋转轴的单位法向量
-
-
-
-            var q1 = new THREE.Quaternion().setFromAxisAngle(vec_rotate.negate(),angle)//变换quaternion
-
-            var q2 = new THREE.Quaternion();
-            q2.copy(webgl.earthGroup.quaternion);//得到球体初始quaternion
-            q1.multiply(q2);//算出终点quaternion
-
-            var new_quaternion = new THREE.Quaternion();
-
-            var obj = { t : 0};
-            TweenMax.to( obj, 1,{t:1,onUpdate:function(){
-                THREE.Quaternion.slerp(q2,q1,new_quaternion,obj.t);
-                webgl.earthGroup.quaternion.set( new_quaternion.x,new_quaternion.y,new_quaternion.z,new_quaternion.w)
-            }})
+            webgl.rotateToCenter()
 
             // webgl.earthGroup.quaternion.copy( q1 )
 
         },
         touchmove:function(){},
         touchend:function(){
-            // TweenMax.to(webgl.earthGroup.rotation,1,{x:0,y:0,z:0})
+            main.touch.isTouch = false;
+            switch( main.stage ){
+                case 1://还在Tween阶段
+                    break;
+                case 2://过渡反向序列帧
+                    Stage2ToStage1();
+                    break;
+                case 3://视频退回过度
+                    Stage3ToStage2();
+                    break;
+            }
+            // if(!main.player1.paused){
+            //     main.player1.repeat = 1;
+            //     main.player1.direction = -1;
+            // }
         },
     });
 
     $(".P_webgl .btn-box").on("touchstart",function(e){
         e.preventDefault();
+    })
+    $(".video").on({
+        play: function( e ){
+
+            console.log( e );
+            console.log( this );
+            
+        },
+        end: function( e ){
+
+            console.log( this );
+
+        }
     })
 };
 main.scrollInit = function(selector,start){

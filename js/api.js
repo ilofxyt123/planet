@@ -1,5 +1,5 @@
 var _getData = {
-    getProvince:function(callback){
+    getProvince:function( callback ){
         $.post(
             "index.php",
             {action : "get_province" },
@@ -11,7 +11,7 @@ var _getData = {
             }
         );
     },
-    getCity:function(callback){
+    getCity:function( callback ){
         //更新vm.server_data.city这个数组
         $.post(
             "index.php",
@@ -22,7 +22,7 @@ var _getData = {
             }
         );
     },
-    getShop:function(callback){
+    getShop:function( callback ){
         //更新vm.server_data.address这个数组
         $.post(
             "index.php",
@@ -33,6 +33,11 @@ var _getData = {
             }
         );
     },
+    getPrize:function( callback ){
+        $.getJSON("getprize.json",{},function( data ){
+            callback && callback( data )
+        });
+    }
 };
 
 var _uploadData = {

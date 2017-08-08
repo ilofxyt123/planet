@@ -34,7 +34,13 @@ var _getData = {
         );
     },
     getPrize:function( callback ){
-        $.getJSON("index.php",{action:"lottery"},function( data ){
+        // $.getJSON("index.php",{action:"lottery"},function( data ){
+        //     if( callback ){
+        //         callback( data );
+        //     }
+        // });
+
+        $.getJSON("getprize.json",function( data ){
             if( callback ){
                 callback( data );
             }

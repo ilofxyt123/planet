@@ -483,7 +483,7 @@ var options = {
                     needAnimation:false,
                 },
                 
-                currentPoint:"wz",
+                currentPoint:"",
             },
         },
         ios:Utils.browser("ios"),
@@ -571,6 +571,20 @@ var options = {
                                                         /*webgl*/
         pwegbl_btn_chaxun:function(){
             this.pquery.visible = true;
+        },
+        pwebgl_btn_getPrize:function(){
+            var _vm = this;
+            var callback = function( data ){
+                if( data.status ){
+                    _vm.server_data.prizeType = data.data;
+                    _vm.pprize.visible = true;
+                    _vm.pwebgl.visible = false;
+                    main.stopRender();
+                }else{
+                    console.log( "抽奖后台出问题了"+data )
+                }
+            };
+            _getData.getPrize( callback );
         },
                
                                                         /*中奖结果页*/
@@ -688,7 +702,7 @@ var options = {
             var number = 0;
             var data = this.server_data.gameData;
             for(var a in data){
-                if(data[a]){
+                if(data[a].get){
                    number++; 
                 }
             }
@@ -1128,7 +1142,7 @@ var webgl = new function(){
             height:44,
             img:$(".player-container .img1"),
             music:$("#hl")[0],
-            icon:$(".animation-box .tip1")
+            icon:$(".right-box .icon2").eq(0)
         },
         spanish:{
             name:"spanish",
@@ -1140,7 +1154,7 @@ var webgl = new function(){
             height:48,
             img:$(".player-container .img2"),
             music:$("#sp")[0],
-            icon:$(".animation-box .tip2")
+            icon:$(".right-box .icon2").eq(1)
         },
         wz:{
             name:"wz",
@@ -1152,7 +1166,7 @@ var webgl = new function(){
             height:48,
             img:$(".player-container .img3"),
             music:$("#wz")[0],
-            icon:$(".animation-box .tip3")
+            icon:$(".right-box .icon2").eq(2)
         }
     };
     this.currentPointName = "";
@@ -1443,12 +1457,14 @@ webgl.rotateToCenter = function(){
             min_distance = distance;
             min_obj = obj;//最近的点
             this.currentPointName = this.PointData[prop].name;
+            vm.server_data.gameData.currentPoint = this.currentPointName;
         }
         else{
             if(distance < min_distance){
                 min_distance = distance;
                 min_obj = obj;//最近的点
                 this.currentPointName = this.PointData[prop].name;
+                vm.server_data.gameData.currentPoint = this.currentPointName;
             }
         }
     }
@@ -1505,6 +1521,9 @@ webgl.rotateToCenter = function(){
                     main.player2.repeat = 0;
                     main.player2.callback1 = function(){
                         if( vm.server_data.gameData[webgl.currentPointName].get == false){
+                            webgl.PointData[webgl.currentPointName].icon.css({
+                                opacity:0,
+                            })
                             vm.server_data.gameData[webgl.currentPointName].get = true;
                             vm.server_data.gameData[webgl.currentPointName].needAnimation = true;
                         }
@@ -1775,18 +1794,24 @@ main.loadCallBack = function(){
     this.player1.callback2 = function(){//退出过度动画后重新开始回调 + 清理当前点的名字
         main.startRender();
         main.stage = 1;
-        if(vm.server_data.gameData.needAnimation){
-            var str = webgl.currentPointName;
-            
-            webgl.PointData[webgl.currentPointName].icon.show();
+        if(vm.server_data.gameData[webgl.currentPointName].needAnimation){
+            webgl.PointData[webgl.currentPointName].icon.css({opacity:1});
             $(".animation-box").fi();
             
-            vm.server_data.gameData.needAnimation = false;
+            setTimeout(function(){
+                $(".animation-box").fo();
+                webgl.PointData[webgl.currentPointName].icon.css({
+                    transform:"translate3d(0,0,0) scale(1)",
+                })
+            },1000)
 
+
+        }else{
+            webgl.currentPointName = "";
+            vm.server_data.gameData.currentPoint = "";
         }
         $(".player-container").fo(function(){
             $("#player1").hide();
-            webgl.currentPointName ="";
         });
         
         
@@ -1911,13 +1936,24 @@ main.stopRender = function(){
 };
 
 main.addEvent=function(){
-    document.body.ontouchmove = function(e){
+    var onIconTransitionEnd = function( e ){
+        vm.server_data.gameData[webgl.currentPointName].needAnimation = false;
+        webgl.currentPointName = "";
+        vm.server_data.gameData.currentPoint = "";
+        if( vm.key_index ==3){
+            $(".animation-box .tip-all,.animation-box .big-icon").show();
+            $(".animation-box .number").hide();
+            $(".animation-box").fi();
+        }
+    }
+    $(".right-box .icon2").on("transitionend",onIconTransitionEnd)
+    document.body.ontouchmove = function( e ){
         e.preventDefault();
     };
     window.onresize = function(){
         three.onresize();
     }
-    $(window).on("orientationchange",function(e){
+    $(window).on("orientationchange",function( e ){
         if(window.orientation == 0 || window.orientation == 180 )
         {
             vm.hpwarn.visible = false;

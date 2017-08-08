@@ -162,15 +162,15 @@
             <div class="right-box">
                 <div class="icon-box icon-box1">
                     <img src="assets/images/p1-icon-1.png" class="icon">
-                    <img src="assets/images/p1-icon-1b.png" class="icon icon-b" style="display:none;" v-show="server_data.gameData.hlbe.get&&!server_data.gameData.hlbe.needAnimation">
+                    <img src="assets/images/p1-icon-1b.png" class="icon icon2" v-bind:class="server_data.gameData.hlbe.needAnimation?'icon-b':''" style="display:none;" v-show="server_data.gameData.hlbe.get">
                 </div>
                 <div class="icon-box icon-box2">
                     <img src="assets/images/p1-icon-2.png" class="icon">
-                    <img src="assets/images/p1-icon-2b.png" class="icon icon-c" style="display:none;" v-show="server_data.gameData.sp.get&&!server_data.gameData.sp.needAnimation">
+                    <img src="assets/images/p1-icon-2b.png" class="icon icon2" v-bind:class="server_data.gameData.spanish.needAnimation?'icon-c':''" style="display:none;" v-show="server_data.gameData.spanish.get">
                 </div>
                 <div class="icon-box icon-box3">
                     <img src="assets/images/p1-icon-3.png" class="icon">
-                    <img src="assets/images/p1-icon-3b.png" class="icon icon-d" style="display:none;" v-show="server_data.gameData.wz.get&&!server_data.gameData.wz.needAnimation">
+                    <img src="assets/images/p1-icon-3b.png" class="icon icon2" style="display:none;" v-bind:class="server_data.gameData.wz.needAnimation?'icon-d':''" v-show="server_data.gameData.wz.get">
                 </div>
             </div>
 
@@ -195,18 +195,19 @@
              <div class="animation-box" style="display:none;"> 
                 <img src="assets/images/p1-zhezhao.png" alt="" class="content-bg">
                 <div class="content-box">
-                    <img src="assets/images/p1-icon-1txt.png" alt="" class="tip tip1" style="display:none;">
-                    <img src="assets/images/p1-icon-2txt.png" alt="" class="tip tip2" style="display:none;">
-                    <img src="assets/images/p1-icon-3txt.png" alt="" class="tip tip3" style="display:none;">
+                    <img src="assets/images/p1-icon-1txt.png" alt="" class="tip tip1" style="display:none;" v-show="server_data.gameData.currentPoint=='hlbe'">
+                    <img src="assets/images/p1-icon-2txt.png" alt="" class="tip tip2" style="display:none;" v-show="server_data.gameData.currentPoint=='spanish'">
+                    <img src="assets/images/p1-icon-3txt.png" alt="" class="tip tip3" style="display:none;" v-show="server_data.gameData.currentPoint=='wz'">
                     <img src="assets/images/p1-bx-txt.png" alt="" class="tip tip-all" style="display:none;">
 
-                    <span class="number">
+                    <span class="number" v-show="key_index!=3">
                         $[key_index]
                     </span>
 
-                    <img src="assets/images/p1-icon-1b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='hlbe'" style="display:none;">
-                    <img src="assets/images/p1-icon-2b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='spanish'" style="display:none;">
-                    <img src="assets/images/p1-icon-3b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='wz'" style="display:none;">
+                    <!-- <img src="assets/images/p1-icon-1b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='hlbe'" style="display:none;"> -->
+                    <!-- <img src="assets/images/p1-icon-2b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='spanish'" style="display:none;"> -->
+                    <!-- <img src="assets/images/p1-icon-3b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='wz'" style="display:none;"> -->
+                     <img src="assets/images/p1-bx-baoxiang.png" alt="" class="big-icon" style="display:none;" @touchend.once="pwebgl_btn_getPrize"> 
                 </div>
             </div>
         </div>

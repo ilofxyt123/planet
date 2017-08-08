@@ -470,10 +470,21 @@ var options = {
                 shop:"",
             },
             gameData:{
-                hlbe:false,
-                spanish:false,
-                wz:false,
-            }
+                hlbe:{
+                    get:false,
+                    needAnimation:false,
+                },
+                spanish:{
+                    get:false,
+                    needAnimation:false,
+                },
+                wz:{
+                    get:false,
+                    needAnimation:false,
+                },
+                
+                currentPoint:"wz",
+            },
         },
         ios:Utils.browser("ios"),
         /*页面切换控制*/
@@ -670,6 +681,18 @@ var options = {
             this.palert.visible = false;
             this.palert.type = "";
             this.palert.content = "";
+        },
+    },
+    computed:{
+        key_index:function(){
+            var number = 0;
+            var data = this.server_data.gameData;
+            for(var a in data){
+                if(data[a]){
+                   number++; 
+                }
+            }
+            return number;
         },
     },
     delimiters: ['$[', ']']
@@ -1056,6 +1079,13 @@ var webgl = new function(){
         complete:false,
     };
 
+    this.assetsUrl = "assets/"
+
+    this.picUrl = this.assetsUrl+"images/";//图片路径
+    this.texturePath = this.assetsUrl+"images/"; //纹理路径
+    this.modelsUrl = this.assetsUrl+"models/";//模型基础路径
+    this.videoUrl = "video/";//视频序列帧路径
+
     //可被touch到的物体,this.touchObjects.indexOf(testObj) !=-1
     this.touchObjects = [];
 
@@ -1090,17 +1120,39 @@ var webgl = new function(){
     this.PointData = {
         hlbe:{
             name:"hlbe",
-            texture:"",
-            position:new THREE.Vector3(300,0,0),
+            texture:this.picUrl+"hl.png",
+            position:new THREE.Vector3(320/SQ3,320/SQ3,-320/SQ3),
             obj:undefined,
-            frames:"hlbe"
+            frames:"hlbe",
+            width:224,
+            height:44,
+            img:$(".player-container .img1"),
+            music:$("#hl")[0],
+            icon:$(".animation-box .tip1")
         },
         spanish:{
             name:"spanish",
-            texture:"",
-            position:new THREE.Vector3(300/SQ3,300/SQ3,300/SQ3),
+            texture:this.picUrl+"sp.png",
+            position:new THREE.Vector3(320/SQ3,320/SQ3,320/SQ3),
             obj:undefined,
-            frames:"spanish"
+            frames:"spanish",
+            width:154,
+            height:48,
+            img:$(".player-container .img2"),
+            music:$("#sp")[0],
+            icon:$(".animation-box .tip2")
+        },
+        wz:{
+            name:"wz",
+            texture:this.picUrl+"wz.png",
+            position:new THREE.Vector3(-320/SQ3,-320/SQ3,-320/SQ3),
+            obj:undefined,
+            frames:"wz",
+            width:224,
+            height:48,
+            img:$(".player-container .img3"),
+            music:$("#wz")[0],
+            icon:$(".animation-box .tip3")
         }
     };
     this.currentPointName = "";
@@ -1120,8 +1172,6 @@ var webgl = new function(){
     //切换到第几张纹理
     this.textureIndex = 0;
 
-    //纹理路径
-    this.texturePath = "assets/images/";
     //时钟
     this.clock = new THREE.Clock();
 };
@@ -1263,7 +1313,7 @@ webgl.addEarth = function(){
                     side:THREE.DoubleSide,
                    depthWrite:false,
                    transparent:true,
-                   opacity:0.6
+                   opacity:0.9
                 });
     this.liusu_up.material = material3;
     this.liusu_up.scale.set(1.01,1.01,1.01)
@@ -1277,7 +1327,7 @@ webgl.addEarth = function(){
                     side:THREE.DoubleSide,
                    depthWrite:false,
                    transparent:true,
-                   opacity:0.6
+                   opacity:0.9
                 });
     this.liusu_center.material = material4;
     this.liusu_center.scale.set(1.01,1.01,1.01)
@@ -1289,22 +1339,32 @@ webgl.addEarth = function(){
     three.scene.add(group);
 
     for(point in this.PointData){
-        var all = this.PointData;
-        var point = all[point];
+        var points = this.PointData;
+        var point = points[point]; 
+        
+        point.texture= three.loadTexture({
+            url:point.texture+"?v2"
+        })
 
-        var RedPoint = new THREE.Mesh(new THREE.SphereGeometry(20,10,10),new THREE.MeshBasicMaterial({color:0xff0000}))
-        group.add(RedPoint);
-        RedPoint.position.set( point.position.x, point.position.y, point.position.z );
-        RedPoint.name = point.name;
-        point.obj = RedPoint;
+        var RedPoint = new THREE.Mesh(new THREE.PlaneGeometry(point.width,point.height),new THREE.MeshBasicMaterial({map:point.texture,transparent:true,}))
+
+        var geo = new THREE.Geometry();
+        geo.vertices.push( point.position );
+        var RedPoint2 = new THREE.Sprite(new THREE.SpriteMaterial({map:point.texture,depthWrite:false}))
+        
+        RedPoint2.position.set( point.position.x, point.position.y, point.position.z )
+        RedPoint2.scale.set(point.width*1.2,point.width*1.2,1)
+        group.add(RedPoint2);
+        RedPoint2.name = point.name;
+        point.obj = RedPoint2;
     }
 
 
 };//加地球
 webgl.addSky = function(){
     var skyMesh = three.getSkyByCubeGeo({
-        size:40960,
-        version:5
+        size:2048,
+        version:6,
     })
     this.sky = skyMesh;
 
@@ -1393,6 +1453,15 @@ webgl.rotateToCenter = function(){
         }
     }
 
+    
+    if(!main.frames[webgl.currentPointName].load_complete&&main.frames[webgl.currentPointName].once){//图片没加载过
+        main.frames[webgl.currentPointName].once = false;
+        main.loadFrames( main.frames[webgl.currentPointName], function(){
+            
+        })
+    }
+
+
 
     var pointPos = new THREE.Vector3().copy(min_obj.getWorldPosition())//球心到红点方向向量
    
@@ -1418,13 +1487,14 @@ webgl.rotateToCenter = function(){
         if(main.touch.isTouch){
             main.stage = 2;
             main.player1.direction = 1;
-            if(vm.ios){
+            if(false){
                 main.player1.repeat = 1;
                 main.player1.callback1 = function(){
                     main.stage = 3;
                     $(main.frames[webgl.currentPointName].video).show();
                     $("#player1").fo();
                     main.frames[webgl.currentPointName].video.play();
+                    webgl.PointData[webgl.currentPointName].img.fi();
                 };
             }else{//安卓
                 var callback1 = function(){
@@ -1432,17 +1502,29 @@ webgl.rotateToCenter = function(){
                     $("#player1").fo();
                     $("#player2").show();
                     main.player2.init( main.frames[webgl.currentPointName].urls )
-                    main.player2.loop = true;
+                    main.player2.repeat = 0;
+                    main.player2.callback1 = function(){
+                        if( vm.server_data.gameData[webgl.currentPointName].get == false){
+                            vm.server_data.gameData[webgl.currentPointName].get = true;
+                            vm.server_data.gameData[webgl.currentPointName].needAnimation = true;
+                        }
+                        main.player2.set( 0 )
+                        main.player2.play();
+                        webgl.PointData[webgl.currentPointName].music.play();
+                    }
                     main.player2.play();
+                    webgl.PointData[webgl.currentPointName].img.fi();
+                    webgl.PointData[webgl.currentPointName].music.play();
                 }
                 main.player1.callback1 = callback1;
-                if(!main.frames[webgl.currentPointName].load_complete){//图片没加载过
+                if(!main.frames[webgl.currentPointName].load_complete&&main.frames[webgl.currentPointName].once){//图片没加载过
                     main.player1.loop = true;
+                    main.frames[webgl.currentPointName].once = false;
                     main.loadFrames( main.frames[webgl.currentPointName], function(){
-                        main.player1.repeat = 1;
+                        main.player1.repeat = 0;
                     })
                 }else{
-                    main.player1.repeat = 1;
+                    main.player1.repeat = 0;
                 }
             }
             
@@ -1516,9 +1598,11 @@ var main = new function(){
         isPlay:false,
         obj:document.getElementById("video")
     };
-
-    this.picUrl = "assets/images/";//图片路径
-    this.modelsUrl = "assets/models/";//模型基础路径
+    this.tl_galaxy = undefined;
+    this.assetsUrl = "assets/"
+    this.picUrl = this.assetsUrl+"images/";//图片路径
+    this.textureUrl = this.assetsUrl+"texture/";//天空盒路径
+    this.modelsUrl =this.assetsUrl+"models/";//模型基础路径
     this.videoUrl = "video/";//视频序列帧路径
     this.ImageList = [
         this.picUrl+"phone.png",
@@ -1528,13 +1612,20 @@ var main = new function(){
         this.modelsUrl+"scene/normal_stone1.png",
         this.modelsUrl+"scene/stone2.png",
         this.modelsUrl+"scene/normal_stone2.png",
+
+        this.textureUrl+"left.jpg",
+        this.textureUrl+"right.jpg",
+        this.textureUrl+"up.jpg",
+        this.textureUrl+"down.jpg",
+        this.textureUrl+"front.jpg",
+        this.textureUrl+"back.jpg",
     ];
     this.clouds = [];
     for(var i=1;i<=75;i++){
         this.ImageList.push(this.modelsUrl+"scene/ls/"+i+".png")
     }
     
-    for(var i=1;i<=33;i++){
+    for(var i=1;i<=25;i++){
         this.clouds.push(this.picUrl+"cloud/"+i+".jpg");
     }
     this.ImageList = new Array().concat(this.ImageList,this.clouds)
@@ -1555,25 +1646,31 @@ var main = new function(){
         hlbe:{
             urls:[],
             load_complete:false,
-            video:$("#video1")[0]
+            once:true,
+            // video:$("#video1")[0]
         },
         spanish:{
             urls:[],
             load_complete:false,
-            video:$("#video2")[0]
+            once:true,
+            // video:$("#video2")[0]
         },
         wz:{
             urls:[],
             load_complete:false,
-            video:$("#video3")[0]
+            once:true,
+            // video:$("#video3")[0]
         }
     }
 
-    for(var i=1;i<=458;i++){
+    for(var i=1;i<=124;i++){
         this.frames.hlbe.urls.push(this.videoUrl+"hlbe/"+i+".jpg");
     }
-    for(var i=1;i<=460;i++){
+    for(var i=1;i<=124;i++){
         this.frames.spanish.urls.push(this.videoUrl+"spanish/"+i+".jpg");
+    }
+    for(var i=1;i<=151;i++){
+        this.frames.wz.urls.push(this.videoUrl+"wz/"+i+".jpg");
     }
 
     this.stage = 1;//当前阶段1
@@ -1587,10 +1684,13 @@ main.init=function(){
     this.loader.total = this.ImageList.length + webgl.loader.total;
 };
 main.start=function(){
-    var galaxy = new TimelineMax();
-    galaxy.to(".galaxy",45,{rotation:20,scale:1.5,ease:"Linear.easeNone"})
+    this.tl_galaxy = new TimelineMax();
+    this.tl_galaxy.to(".galaxy",45,{rotation:20,scale:1.5,ease:"Linear.easeNone"})
     setTimeout(function(){
-        galaxy.timeScale( 10 )
+        if(!main.tl_galaxy.paused){
+            main.tl_galaxy.timeScale( 10 )
+        }
+       
     },3000)
     Utils.preloadImage(this.ImageList,function(){
         main.loadCallBack();
@@ -1661,11 +1761,10 @@ main.TranslateBg = function(){
     // },3000)
 };
 main.loadCallBack = function(){
-    webgl.loadCallback();
-    vm.ploading.visible = false;
-    $(".bg1").fo();
-    $(".bg2").fi();
-    $(".rule").show();
+    // for(var a in this.frames){
+    //     main.loadFrames(this.frames[a],function(){})
+    // }  
+    
     for(var i = 0;i<this.clouds.length;i++){
         var img = new Image();
         img.src = this.clouds[i];
@@ -1676,14 +1775,26 @@ main.loadCallBack = function(){
     this.player1.callback2 = function(){//退出过度动画后重新开始回调 + 清理当前点的名字
         main.startRender();
         main.stage = 1;
+        if(vm.server_data.gameData.needAnimation){
+            var str = webgl.currentPointName;
+            
+            webgl.PointData[webgl.currentPointName].icon.show();
+            $(".animation-box").fi();
+            
+            vm.server_data.gameData.needAnimation = false;
+
+        }
         $(".player-container").fo(function(){
             $("#player1").hide();
             webgl.currentPointName ="";
         });
         
+        
     };
-    if(!vm.ios){
-        main.player2 = new Player("player2")
+    // if(!vm.ios){
+    if(true){
+        main.player2 = new Player("player2");
+        main.player2.speed = 80;
     }
     if(!vm.server_data.haveFill){
         var type = vm.palert.choice.fill;
@@ -1691,8 +1802,19 @@ main.loadCallBack = function(){
         vm.openAlert( type, content );
         return;
     }
-    // vm.pwebgl.visible = true;
-    // this.startRender();
+
+    main.addEvent();
+    webgl.loadCallback();
+    main.startRender();
+    
+    setTimeout(function(){
+        main.tl_galaxy.pause()
+        vm.ploading.visible = false;
+        vm.pwebgl.visible = true;
+        $(".bg1").fo();
+        $(".bg2").fi();
+        $(".rule").show();
+    },2000)
 
     // vm.pshare.visible = true;
     // vm.pend.visible = true;
@@ -1710,12 +1832,10 @@ main.loadCallBack = function(){
 
     // vm.pquery.visible = true;
 
-        var type = vm.palert.choice.reg;
-        var content = vm.palert.txt[type];
-        vm.openAlert( type, content );
+        // var type = vm.palert.choice.reg;
+        // var content = vm.palert.txt[type];
+        // vm.openAlert( type, content );
 
-
-    main.addEvent();
     setTimeout(function(){
         TweenLite.to(webgl.earthGroup.position,4,{x:0,y:50,z:0,ease:"Linear.easeNone"})
         TweenLite.to(webgl.earthGroup.scale,4,{x:1,y:1,z:1,ease:"Linear.easeNone"})
@@ -1810,38 +1930,42 @@ main.addEvent=function(){
 
     var Stage2ToStage1 = function(){
         main.player1.direction = -1;
-        main.player1.repeat = 1;
+        main.player1.repeat = 0;
     };
     var Stage3ToStage2 = function(){
         main.stage = 2;
-        if( vm.ios ){
+        if( false ){
             main.frames[webgl.currentPointName].video.pause()
             main.frames[webgl.currentPointName].video.currentTime = 0;
             $("#player1").show();
             $(main.frames[webgl.currentPointName].video).hide();
+            webgl.PointData[webgl.currentPointName].img.hide();
         }else{
             $("#player2").hide();
             main.player2.pause();
             main.player2.set( 0 );
             $("#player1").show();
+            webgl.PointData[webgl.currentPointName].img.hide();
+            webgl.PointData[webgl.currentPointName].music.pause();
+            webgl.PointData[webgl.currentPointName].music.currentTime = 0;
         }
 
         main.player1.direction = -1;
-        main.player1.repeat = 2;
+        main.player1.repeat = 0;
         main.player1.set( main.player1.framesLength-1 );
         main.player1.play();
         $("#player1").show();
     };
     var Stage2ToStage3 = function(){
-        if( vm.ios ){
+        if( false ){
             main.player1.direction = 1;
-            main.player1.repeat = 1;  
+            main.player1.repeat = 0;  
         }else{
             main.player1.direction = 1;
             if( !main.frames[webgl.currentPointName].load_complete ){
                 main.player1.loop = true;
             }else{
-                main.player1.repeat = 1;
+                main.player1.repeat = 0;
             }
         }
     };
@@ -1892,19 +2016,19 @@ main.addEvent=function(){
     $(".P_webgl .btn-box").on("touchstart",function(e){
         e.preventDefault();
     })
-    $(".video").on({
-        play: function( e ){
+    // $(".video").on({
+    //     play: function( e ){
 
-            console.log( e );
-            console.log( this );
+    //         console.log( e );
+    //         console.log( this );
             
-        },
-        end: function( e ){
+    //     },
+    //     end: function( e ){
 
-            console.log( this );
+    //         console.log( this );
 
-        }
-    })
+    //     }
+    // })
 };
 main.scrollInit = function(selector,start){
     this.touch.ScrollObj = $(selector);

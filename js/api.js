@@ -1,10 +1,19 @@
 var _getData = {
     getProvince:function( callback ){
+        // $.post(
+        //     "index.php",
+        //     {action : "get_province" },
+        //     function (data) {
+        //         data = eval("("+data+")");
+        //         if(callback){
+        //             callback(data)
+        //         }
+        //     }
+        // );
+
         $.post(
-            "index.php",
-            {action : "get_province" },
+            "province.json",
             function (data) {
-                data = eval("("+data+")");
                 if(callback){
                     callback(data)
                 }
@@ -13,12 +22,21 @@ var _getData = {
     },
     getCity:function( callback ){
         //更新vm.server_data.city这个数组
+        // $.post(
+        //     "index.php",
+        //     {action : "get_city" , province : vm.server_data.province},
+        //     function (data) {
+        //         callback && callback(data)
+        //     }
+        // );
+
+
         $.post(
-            "index.php",
-            {action : "get_city" , province : vm.server_data.province},
+            "city.json",
             function (data) {
-                data = eval("("+data+")");
-                callback && callback(data)
+                if(callback){
+                    callback(data)
+                }
             }
         );
     },
@@ -45,18 +63,35 @@ var _getData = {
                 callback( data );
             }
         });
-    }
+    },
+    getMyInfo:function( callback ){
+        $.getJSON("myinfo.json",function( data ){
+            if( callback ){
+                callback( data );
+            }
+        });
+
+        // $.getJSON("index.php",{action:"my_info"},function( data ){
+        //     if( callback ){
+        //         callback( data );
+        //     }
+        // });
+    },
+    getVipInfo:function(callback){
+        $.getJSON("vipInfo.json",function(data){
+            callback&&callback(data);
+        })
+    },
 };
 
 var _uploadData = {
-    addInfo:function(callback){
-        $.post(
-            "index.php",
-            {action : "add_info" , truename : vm.server_data.name , mobile : vm.server_data.tel , shop_id : vm.server_data.shop_id},
-            function (data) {
-                data = eval("("+data+")");
-                callback && callback();
-            }
-        );
-    },
+    addInfo:function( callback ){
+        // $.getJSON("index.php",{action:"add_info"},function( data ){
+        //     if( callback ){
+        //         callback( data );
+        //     }
+        // });
+
+        console.log("上传数据")
+    }
 };

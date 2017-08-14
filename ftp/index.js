@@ -484,7 +484,7 @@ var options = {
                     get:false,
                     needAnimation:false,
                 },
-                
+
                 currentPoint:"",
             },
         },
@@ -610,7 +610,7 @@ var options = {
             var _vm = this;
             var callback = function( data ){
                 if( data.status ){
-                    _vm.server_data.prizeType = data.data;
+                    _vm.server_data.prizeType = data.lottery_result;
                     _vm.pprize.visible = true;
                     _vm.pwebgl.visible = false;
                     main.stopRender();
@@ -620,7 +620,7 @@ var options = {
             };
             _getData.getPrize( callback );
         },
-               
+
                                                         /*中奖结果页*/
         pprize_btn_paddress:function(){
             this.paddress.visible = true;
@@ -680,20 +680,30 @@ var options = {
                 return;
             }
 
-            // _uploadData.fillInfo();
+            var callback = function( result ){
+                if(result.status){
+                    location.href = "index.php";
+                }else{
+                    console.log(result)
+                }
+            }
+            _uploadData.addInfo( callback );
 
         },
         onPfillProvinceChangeHandle:function(e){
-            console.log(this.server_data.select_province)
-            // _getData.getCity(this.server_data.select_province)
+            var _vm = this;
+            _getData.getCity(function(data){
+                _vm.server_data.city = data.data
+            })
         },
         onPfillCityChangeHandle:function(e){
-            console.log(this.server_data.select_city)
-            // _getData.getShop(this.server_data.select_city)
+            var _vm = this;
+            _getData.getShop(function(data){
+                _vm.server_data.address = data.data
+            })
         },
         onPfillAddressChangeHandle:function(e){
-            // this.server_data.shop_id = e.target.selectedOptions[0].getAttribute("shopid");
-            console.log(this.server_data.select_address)
+            this.server_data.shop_id = e.target.selectedOptions[0].getAttribute("shopid");
         },
 
                                                         /*查询可使用门店页*/
@@ -701,15 +711,19 @@ var options = {
             this.paddress.visible = false;
         },
         onPaddressProvinceChangeHandle:function(e){
-            // _getData.getCity(this.server_data.select_province)
-            console.log(this.server_data.select_province)
+            var _vm = this;
+            _getData.getCity(function(data){
+                _vm.server_data.city = data.data
+            })
         },
         onPaddressCityChangeHandle:function(e){
-            // _getData.getShop(this.server_data.select_city)
-            console.log(this.server_data.select_city)
+            var _vm = this;
+            _getData.getShop(function(data){
+                _vm.server_data.address = data.data
+            })
         },
         onPaddressAddressChangeHandle:function(e){
-            console.log(this.server_data.select_address)
+
         },
 
 
@@ -755,7 +769,7 @@ var options = {
             var data = this.server_data.gameData;
             for(var a in data){
                 if(data[a].get){
-                   number++; 
+                   number++;
                 }
             }
             return number;
@@ -1234,7 +1248,7 @@ var webgl = new function(){
 
     //星星
     this.stars = undefined;
-    
+
     
     //云+地球的整体
     this.earthGroup = undefined;
@@ -1469,7 +1483,7 @@ webgl.addStars = function(){
                 var z = THREE.Math.randFloat( 800,1000 )
                 break;
         }
-        
+
 
         var flag = (Math.random()-0.5)>0?1:-1
         x*=flag;
@@ -1526,7 +1540,7 @@ webgl.updateStar = function(){
     var number = this.stars.children.length;
     for(var i=0;i<number;i++){
         var rand = parseInt(10*Math.random());
-        TweenMax.fromTo(this.stars.children[i].material,1,{opacity:1},{opacity:0,repeat:-1,yoyo:true,delay:rand})
+        TweenMax.fromTo(this.stars.children[i].material,1,{opacity:1},{opacity:0,repeat:-1,yoyo:true})
     }
 };
 
@@ -1588,7 +1602,7 @@ webgl.rotateToCenter = function(){
         }
     }
 
-    
+
     if(!main.frames[webgl.currentPointName].load_complete&&main.frames[webgl.currentPointName].once){//图片没加载过
         main.frames[webgl.currentPointName].once = false;
         main.player1.loop = true;
@@ -1621,81 +1635,60 @@ webgl.rotateToCenter = function(){
         webgl.earthGroup.quaternion.set( new_quaternion.x, new_quaternion.y, new_quaternion.z, new_quaternion.w)
     },onComplete:function(){
         if(main.touch.isTouch){
-            if(main.tl_earth == undefined){
-                main.tl_earth = new TimelineMax().pause();
-                main.tl_earth.add(TweenMax.to(webgl.earthGroup.scale,0.5,{x:1.3,y:1.3,z:1.3}));
-                main.tl_earth.play();
-                main.tl_earth.addCallback(webgl.enterCloud);
-                main.stage = 1;
-            }else{
-                main.tl_earth.restart();
-                main.tl_earth.addCallback(webgl.enterCloud);
-                main.stage = 1;
+            main.stage = 2;
+            main.player1.direction = 1;
+            if(false){
+                main.player1.repeat = 1;
+                main.player1.callback1 = function(){
+                    main.stage = 3;
+                    $(main.frames[webgl.currentPointName].video).show();
+                    $("#player1").fo();
+                    main.frames[webgl.currentPointName].video.play();
+                    webgl.PointData[webgl.currentPointName].img.fi();
+                };
+            }else{//安卓
+                var callback1 = function(){
+                    main.stage = 3;
+                    $("#player1").fo();
+                    $("#player2").show();
+                    main.player2.init( main.frames[webgl.currentPointName].urls )
+                    main.player2.repeat = 0;
+                    main.player2.callback1 = function(){
+                        if( vm.server_data.gameData[webgl.currentPointName].get == false){
+                            _uploadData.uploadGameData(function(data){console.log(data)})
+                            webgl.PointData[webgl.currentPointName].icon.css({
+                                opacity:0,
+                            })
+                            vm.server_data.gameData[webgl.currentPointName].get = true;
+                            vm.server_data.gameData[webgl.currentPointName].needAnimation = true;
+                        }
+                        main.player2.set( 0 )
+                        main.player2.play();
+                        webgl.PointData[webgl.currentPointName].music.currentTime = 0;
+                        webgl.PointData[webgl.currentPointName].music.play();
+                    }
+                    main.player2.play();
+                    webgl.PointData[webgl.currentPointName].img.fi();
+                    webgl.PointData[webgl.currentPointName].music.play();
+                };
+                main.player1.callback1 = callback1;
+                // if(!main.frames[webgl.currentPointName].load_complete){//图片没加载过
+                //     main.player1.loop = true;
+                // }else{
+                //     main.player1.repeat = 0;
+                // }
             }
-
+            
+            $("#player1").show()
+            $(".player-container").fi();
+            main.player1.play();
+            main.stopRender();
+            
         }
     }})
 };
 webgl.rotateEarth = function(){
     this.earthGroup.rotation.y-=0.001;
-};
-webgl.enterCloud = function(){
-    main.tl_earth.removeCallback(webgl.enterCloud);
-    main.stage = 2;
-    main.player1.direction = 1;
-    if(false){
-        main.player1.repeat = 1;
-        main.player1.callback1 = function(){
-            main.stage = 3;
-            $(main.frames[webgl.currentPointName].video).show();
-            $("#player1").fo();
-            main.frames[webgl.currentPointName].video.play();
-            webgl.PointData[webgl.currentPointName].img.fi();
-        };
-    }else{//安卓
-        var callback1 = function(){
-            main.stage = 3;
-            $("#player1").fo();
-            $("#player2").show();
-            main.player2.init( main.frames[webgl.currentPointName].urls )
-            main.player2.repeat = 0;
-            main.player2.callback1 = function(){
-                if( vm.server_data.gameData[webgl.currentPointName].get == false){
-                    webgl.PointData[webgl.currentPointName].icon.css({
-                        opacity:0,
-                    })
-                    vm.server_data.gameData[webgl.currentPointName].get = true;
-                    vm.server_data.gameData[webgl.currentPointName].needAnimation = true;
-                }
-                main.player2.set( 0 )
-                main.player2.play();
-                webgl.PointData[webgl.currentPointName].music.currentTime = 0;
-                webgl.PointData[webgl.currentPointName].music.play();
-            }
-            main.player2.play();
-            webgl.PointData[webgl.currentPointName].img.fi();
-            webgl.PointData[webgl.currentPointName].music.play();
-        };
-        main.player1.callback1 = callback1;
-        // if(!main.frames[webgl.currentPointName].load_complete){//图片没加载过
-        //     main.player1.loop = true;
-        // }else{
-        //     main.player1.repeat = 0;
-        // }
-    }
-
-    $("#player1").show()
-    $(".player-container").fi();
-    main.player1.play();
-    main.stopRender();
-};
-webgl.backTo0 = function(){
-alert(1)
-    webgl.currentPointName = "";
-    vm.server_data.gameData.currentPoint = "";
-
-    main.stage = 0;
-    main.tl_earth.removeCallback(webgl.backTo0,0)
 };
 
 webgl.render = function(){
@@ -1746,7 +1739,8 @@ var main = new function(){
         obj:document.getElementById("video")
     };
     this.tl_galaxy = undefined;
-    this.assetsUrl = "assets/"
+    this.assetsUrl = "assets/";
+    // this.assetsUrl = "http://epshow.img.i-creative.cn/planet/assets/"
     this.picUrl = this.assetsUrl+"images/";//图片路径
     this.textureUrl = this.assetsUrl+"texture/";//天空盒路径
     this.modelsUrl =this.assetsUrl+"models/";//模型基础路径
@@ -1838,7 +1832,7 @@ var main = new function(){
     for(var i=1;i<=38;i++){
         this.ImageList.push(this.modelsUrl+"scene/ls/"+i+".png")
     }
-    
+
     for(var i=1;i<=25;i++){
         this.clouds.push(this.picUrl+"cloud/"+i+".jpg");
     }
@@ -1875,9 +1869,7 @@ var main = new function(){
             once:true,
             // video:$("#video3")[0]
         }
-    };
-
-    this.tl_earth = undefined;//timeline之地球
+    }
 
     for(var i=1;i<=124;i++){
         this.frames.hlbe.urls.push(this.videoUrl+"hlbe/"+i+".jpg");
@@ -1889,7 +1881,7 @@ var main = new function(){
         this.frames.wz.urls.push(this.videoUrl+"wz/"+i+".jpg");
     }
 
-    this.stage = 0;//当前阶段1
+    this.stage = 1;//当前阶段1
     
 };
 main.init=function(){
@@ -1932,22 +1924,36 @@ main.init=function(){
 
     _getData.getVipInfo(callback);//获取vip
 
+
+    var callback = function(data){
+        if(data.status == 1 && data.data.lottery_result && data.data.is_award){
+            vm.server_data.myInfo.province = data.data.shop.province;
+            vm.server_data.myInfo.city = data.data.shop.city;
+            vm.server_data.myInfo.shop = data.data.shop.name;
+
+        }
+        else{
+            console.log(data)
+        }
+    };
+    _getData.getMyInfo(callback);//获取vip
+
 };
 main.start=function(){
     this.tl_galaxy = new TimelineMax();
     this.tl_galaxy.to(".galaxy",45,{rotation:20,scale:1.5,ease:"Linear.easeNone"})
-    // setTimeout(function(){
-    //     if(!main.tl_galaxy.paused){
-    //         main.tl_galaxy.timeScale( 10 )
-    //     }
-    //
-    // },3000)
+    setTimeout(function(){
+        if(!main.tl_galaxy.paused){
+            main.tl_galaxy.timeScale( 10 )
+        }
+
+    },3000)
 
     setTimeout(function(){
         Utils.preloadImage(main.ImageList,function(){
             main.loadCallBack();
+            webgl.load();
         },true);
-        webgl.load();
     },500)
 
 
@@ -2024,6 +2030,7 @@ main.loadCallBack = function(){
     //     main.loadFrames(this.frames[a],function(){})
     // }
     Utils.lazyLoad();
+
     this.TranslateBg();
 
     for(var i = 0;i<this.clouds.length;i++){
@@ -2031,30 +2038,30 @@ main.loadCallBack = function(){
         img.src = this.clouds[i];
         this.clouds[i] = img;
     }
-
     this.player1 = new Player("player1");
     this.player1.init(this.clouds);
     this.player1.callback2 = function(){//退出过度动画后重新开始回调 + 清理当前点的名字
         main.startRender();
         main.stage = 1;
-        main.tl_earth.reverse();
-        main.tl_earth.addCallback(webgl.backTo0);
         if(vm.server_data.gameData[webgl.currentPointName].needAnimation){
             webgl.PointData[webgl.currentPointName].icon.css({opacity:1});
             $(".animation-box").fi();
-            
+
             setTimeout(function(){
                 $(".animation-box").fo();
                 webgl.PointData[webgl.currentPointName].icon.css({
                     transform:"translate3d(0,0,0) scale(1)",
                 })
             },1000)
+        }else{
+            webgl.currentPointName = "";
+            vm.server_data.gameData.currentPoint = "";
         }
         $(".player-container").fo(function(){
             $("#player1").hide();
         });
         
-        
+
     };
     // if(!vm.ios){
     if(true){
@@ -2095,17 +2102,16 @@ main.loadCallBack = function(){
 
     main.addEvent();
     webgl.loadCallback();
-
     main.startRender();
-    
+
     setTimeout(function(){
-        main.tl_galaxy.pause();
+        main.tl_galaxy.pause()
         vm.ploading.visible = false;
         vm.pwebgl.visible = true;
         $(".bg1").fo();
         $(".bg2").fi();
         $(".rule").show();
-    },1000);
+    },2000)
 
     // vm.pshare.visible = true;
     // vm.pend.visible = true;
@@ -2310,10 +2316,6 @@ main.addEvent=function(){
         }
     });
 
-    var Stage1ToStage2 = function(){
-        main.tl_earth.play();
-        main.tl_earth.addCallback(webgl.enterCloud);
-    };
     var Stage2ToStage1 = function(){
         main.player1.direction = -1;
         main.player1.repeat = 0;
@@ -2342,11 +2344,10 @@ main.addEvent=function(){
         main.player1.play();
         $("#player1").show();
     };
-
     var Stage2ToStage3 = function(){
         if( false ){
             main.player1.direction = 1;
-            main.player1.repeat = 0;  
+            main.player1.repeat = 0;
         }else{
             main.player1.direction = 1;
             if( !main.frames[webgl.currentPointName].load_complete ){
@@ -2356,22 +2357,13 @@ main.addEvent=function(){
             }
         }
     };
-    var Stage1ToStage0 = function(){
-        main.tl_earth.reverse();
-        main.tl_earth.removeCallback(webgl.enterCloud);
-        main.tl_earth.addCallback(webgl.backTo0,1)
-    };
 
     $(".long-press").on({
         touchstart:function(e){
             e.preventDefault();
             main.touch.isTouch = true;
             switch( main.stage ){
-                case 0:
-                    break;
                 case 1:
-                    Stage1ToStage2();
-                    return;
                     break;
                 case 2:
                     Stage2ToStage3();
@@ -2394,7 +2386,6 @@ main.addEvent=function(){
             main.touch.isTouch = false;
             switch( main.stage ){
                 case 1://还在Tween阶段
-                    Stage1ToStage0();
                     break;
                 case 2://过渡反向序列帧
                     Stage2ToStage1();

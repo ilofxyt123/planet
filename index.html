@@ -18,103 +18,7 @@
         css = '<'+'link '+'href='+"css/animate.css?v"+Math.random()+' rel='+"stylesheet "+'type='+"text/css"+'>';
         document.write(css);
     </script>
-    <title>雅莹星球</title>
-    <style>
-        .container .k{width:5.16rem;height:8.06rem;position:absolute;left:50%;margin-left:-2.58rem;top:1rem;}
-            .k .k-bg{width:100%;z-index:-1;}
-            .k .title{width:2.24rem;left:50%;margin-left:-1.12rem;top:0.34rem;}
-
-        .P_webgl{}
-            .gl-container{width:100%;height:100%;position: absolute;}
-                .gl-container canvas{width:6.4rem;}
-            .right-box{width:0.5rem;position:absolute;right:0.2rem;top:0.86rem;z-index:21;}
-                .right-box .icon-box{width:0.5rem;height:0.5rem;margin-bottom:0.15rem;}
-                .right-box .icon-box1{}
-                .right-box .icon-box2{}
-                .right-box .icon-box3{}
-                    .icon-box .icon{width:0.5rem;transition:transform 0.6s ease-out;}
-                    .icon-box .icon-b{transform: scale(3,3) translate3d(-0.915rem,1.03rem,0);}
-                    .icon-box .icon-c{transform: scale(3,3) translate3d(-0.915rem,0.82rem,0);}
-                    .icon-box .icon-d{transform: scale(3,3) translate3d(-0.915rem,0.6rem,0);}
-
-            .long-press.btn-box{width:1.2rem;height:1.2rem;position: absolute;left:50%;margin-left:-0.6rem;top:8rem;z-index:10;background-image:url("assets/images/p1-btn.png");background-repeat: no-repeat;background-size:1.2rem;}
-                    .long-press.btn-box .press-tip{width:1.4rem;left:50%;margin-left:-0.7rem;bottom:-0.3rem;}
-            .player-container{width:100%;height:100%;position:absolute;left:0;top:0;max-width:6.4rem;max-height:10.5rem;}
-                .player-container .player{width:100%;height:100%;position:absolute;}
-                .player-container #player1{z-index:2;}
-                .player-container #player2{z-index:1;}
-                .player-container .video{position:absolute;z-index:1;}
-                .player-container .img1{top:4.6rem;width:3.48rem;left:50%;margin-left:-1.74rem;z-index:3;}
-                .player-container .img2{transform: scale(3,3) translate3d(-0.915rem,.82rem,0);}
-                .player-container .img3{top:4.6rem;width:3.3rem;left:50%;margin-left:-1.65rem;z-index:3;}
-
-            .animation-box{position:absolute;z-index:20;width:100%;}
-                .content-box .content-bg{z-index:-1;width:6.4rem;}
-               .animation-box .content-box{width:2.62rem;height:2.96rem;position:absolute;left:50%;margin-left:-1.31rem;top:2.5rem;z-index:1;}
-               .content-box .tip{width:2.62rem;}
-               .content-box .tip1{}
-               .content-box .tip2{}
-               .content-box .tip3{}
-               .content-box .tip-all{}
-
-               .content-box .number{width:0.3rem;height:0.24rem;line-height:0.24rem;text-align:center;position:absolute;left:0.92rem;top:0.4rem;color:black;font-size:0.22rem;z-index:2;}
-
-               .content-box .big-icon{width:1.54rem;position:absolute;left:50%;margin-left:-0.77rem;top:0.95rem;z-index:3;}
-
-
-            .chaxun-btn{width:0.9rem;right:0.2rem;bottom:0.2rem;}
-        .top{width:100%;position:absolute;top:0;z-index:99;height:0.9rem;}
-            .logo{width:0.7rem;left:0.2rem;top:0.2rem;}
-            .rule{width:0.48rem;top:0.2rem;right:0.2rem;}
-
-        .P_loading{}
-            .P_loading .text-box{width:2.88rem;height:0.95rem;position:absolute;left:50%;margin-left:-1.44rem;top:1.5rem;}
-                .text-box .text{width:2.88rem;}
-                .text-box .text1{}
-                .text-box .text2{}
-                .text-box .text3{}
-
-            .loading-box{width:0.84rem;position:absolute;left:50%;margin-left:-0.42rem;top:8.8rem;}
-                .loading-box .loading-arr{width:0.84rem;position:static;}
-                .loading-box .num{width:0.64rem;height:0.3rem;line-height:0.3rem;color:white;position:absolute;left:0.1rem;top:50%;margin-top:-0.14rem;font-size:0.2rem;text-align:center;}
-        
-        .P_share{z-index:120;}
-            .share-mask{width:6.4rem;z-index:-1;top:0;}
-            .share-pic{width:2.6rem;left:50%;margin-left:-1.3rem;top:2.4rem;}
-
-        .P_guanzhu{}
-            .P_guanzhu .content-box{width:5.16rem;height:8.06rem;position:absolute;left:50%;margin-left:-2.58rem;top:1rem;}
-                .content-box .kuang{width:5.16rem;z-index:1;}
-                .content-box .txt{width:3.38rem;left:50%;margin-left:-1.69rem;top:1rem;z-index:2;}
-                .content-box .code{width:2.5rem;left:50%;margin-left:-1.25rem;top:4.5rem;z-index:2;}
-
-        .P_alert{}
-            .P_alert .palert-bg{width:6.4rem;z-index:-1;}
-            .P_alert .alert-box{position:absolute;width:4.5rem;height:3.4rem;left:50%;margin-left:-2.25rem;top:3.12rem;}
-            .alert-box .alert-xx{width:0.4rem;height:0.4rem;position:absolute;right:0.15rem;top:0.15rem;}
-                .alert-xx img{width:100%;}
-            .alert-box .content{margin-top:1.2rem;width:100%;padding:0 0.8rem;text-align: center;font-size:0.2rem;color:#3f3f3f;line-height:0.3rem;}
-            .alert-box .btn{width:2.34rem;left:50%;margin-left:-1.17rem;bottom:0.6rem;}
-
-        .P_rule{}
-            .rule-box{width:5.16rem;height:8.06rem;position:absolute;left:50%;margin-left:-2.58rem;top:1rem;}
-                .rule-title{width:2.25rem;left:50%;margin-left:-1.12rem;top:0.4rem;}
-                .rule-bg{width:100%;z-index:-1;}
-                .scroll-area{width:4.2rem;height:6rem;position: absolute;left:50%;margin-left:-2.1rem;top:1.3rem;overflow:hidden;}
-                    .scroller{width:100%;}
-                .rule-box .arrow{width:0.4rem;top:7.45rem;left:50%;margin-left:-0.2rem;z-index:2;}
-        .P_prize{}
-            .P_prize .prize-pic{width:4.26rem;left:50%;margin-left:-2.13rem;top:1.3rem;}  
-            .P_prize .btn-group2{left:50%;margin-left:-2.15rem;top:6.18rem;}
-        
-        .P_query{}
-            .P_query .xx{width:0.4rem;right:0.3rem;top:0.3rem;}
-            .P_query p.shop-txt{width:4.9rem;position:absolute;left:50%;margin-left:-2.45rem;top:2rem;text-align:center;color:#3f3f3f;font-size:0.2rem;z-index:4;}
-            .P_query .prize-pic{width:4.26rem;left:50%;margin-left:-2.13rem;top:1.3rem;}  
-            .P_query .btn-group2{left:50%;margin-left:-2.15rem;top:6.18rem;}
-            .P_query .big-share{width:2.44rem;left:50%;margin-left:-1.22rem;top:6rem;}
-    </style>
-
+    <title>EP豐·啓之旅</title>
 </head>
 <body>
 
@@ -132,7 +36,7 @@
             <img src="assets/images/loading-1.png" class="galaxy">
         </div>
         <div class="bg2" style="display:none;">
-            <img src="assets/images/bg2.jpg" alt="" class="bg-pic">
+            <img data-src="assets/images/bg2.jpg" alt="" class="bg-pic lazy">
         </div>
     </div>
 
@@ -142,43 +46,64 @@
             <!-- <img src="assets/images/star.png" class="star ani-star"> -->
             <div class="text-box">
                 <img src="assets/images/loading-txt-1.png" alt="" class="text text1 opacity ani-fadeIn">
-                <img src="assets/images/loading-txt-2.png" alt="" class="text text2 opacity ani-fadeIn delay02">
-                <img src="assets/images/loading-title-1.png" alt="" class="text text3 opacity ani-fadeIn delay04">
+                <img src="assets/images/loading-txt-2.png" alt="" class="text text2 opacity ani-fadeIn delay06">
+                <img src="assets/images/loading-title-1.png" alt="" class="text text3 opacity ani-fadeIn delay12">
             </div>
             <div class="loading-box">
                 <img src="assets/images/loading-arrow.png" class="loading-arr">
-                <span class="num">0%</span>
+                <span class="num">100</span>
             </div>
         </div>
     </transition>
 
     <!--WEBGL-->
-    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="onPwebglEnter">
         <div class="container P_webgl" v-show="pwebgl.visible" style="display:none;">
+            <div  style="z-index:-1;width:6.4rem;height:100%;position:absolute;" id="star-container">
+                <img id="sky-bg" src="assets/images/skybg.jpg?v2" style="width:11.36rem;height:11.36rem;left:50%;margin-left:-5.68rem;top:50%;margin-top:-5.68rem;">
+                <img src="assets/images/p1-stone1.png" class="stone1 ani-stone">
+                <img src="assets/images/p1-stone2.png" class="stone2 ani-stone2">
+            </div>
             <div id="WebGL" class="gl-container">
                 <div id="FPS"></div>
             </div>
 
+            <div class="tip-box" style="display:none;">
+                <img data-src="assets/images/p1-tishi.png" alt="" class="circle lazy">
+                <img data-src="assets/images/p1-hand.png" alt="" class="hand ani-hand lazy">
+            </div>
+
+            <div class="text-box">
+                <img data-src="assets/images/p1-title-1.png" class="txt txt1 opacity ani-txt lazy">
+                <img data-src="assets/images/p1-title-2.png" class="txt txt2 opacity ani-txt delay30 lazy">
+                <img data-src="assets/images/p1-title-3.png" class="txt txt3 opacity ani-txt delay60 lazy">
+                <img data-src="assets/images/p1-title-4.png" class="txt txt4 opacity ani-txt delay90 lazy">
+            </div>
+
             <div class="right-box">
                 <div class="icon-box icon-box1">
-                    <img src="assets/images/p1-icon-1.png" class="icon">
-                    <img src="assets/images/p1-icon-1b.png" class="icon icon2" v-bind:class="server_data.gameData.hlbe.needAnimation?'icon-b':''" style="display:none;" v-show="server_data.gameData.hlbe.get">
+                    <img data-src="assets/images/p1-icon-1.png" class="icon lazy">
+                    <img data-src="assets/images/p1-icon-1b.png" class="icon icon2 lazy" v-bind:class="server_data.gameData.hlbe.needAnimation?'icon-b':''" style="display:none;" v-show="server_data.gameData.hlbe.get">
                 </div>
                 <div class="icon-box icon-box2">
-                    <img src="assets/images/p1-icon-2.png" class="icon">
-                    <img src="assets/images/p1-icon-2b.png" class="icon icon2" v-bind:class="server_data.gameData.spanish.needAnimation?'icon-c':''" style="display:none;" v-show="server_data.gameData.spanish.get">
+                    <img data-src="assets/images/p1-icon-2.png" class="icon lazy">
+                    <img data-src="assets/images/p1-icon-2b.png" class="icon icon2 lazy" v-bind:class="server_data.gameData.spanish.needAnimation?'icon-c':''" style="display:none;" v-show="server_data.gameData.spanish.get">
                 </div>
                 <div class="icon-box icon-box3">
-                    <img src="assets/images/p1-icon-3.png" class="icon">
-                    <img src="assets/images/p1-icon-3b.png" class="icon icon2" style="display:none;" v-bind:class="server_data.gameData.wz.needAnimation?'icon-d':''" v-show="server_data.gameData.wz.get">
+                    <img data-src="assets/images/p1-icon-3.png" class="icon lazy">
+                    <img data-src="assets/images/p1-icon-3b.png" class="icon icon2 lazy" style="display:none;" v-bind:class="server_data.gameData.wz.needAnimation?'icon-d':''" v-show="server_data.gameData.wz.get">
                 </div>
             </div>
 
-            <div class="long-press btn-box">
-                <img src="assets/images/p1-txt-1.png" class="press-tip">
+            <div class="long-press btn-box" style="display:none;">
+                <div class="shadow ani-shadow"></div>
+                <img data-src="assets/images/p1-txt-1.png" class="press-tip lazy">
             </div>
 
-            <img src="assets/images/p1-bx-baoxiang.png" alt="" class="chaxun-btn" @touchend="pwegbl_btn_chaxun">
+            <div class="query-box" v-show="server_data.prizeType!=0">
+                <img data-src="assets/images/p1-bx-baoxiang.png" alt="" class="chaxun-btn lazy" @touchend="pwegbl_btn_chaxun">
+                <img data-src="assets/images/p1-txt-2.png" alt="" class="query-txt lazy">
+            </div>
 
             <div class="player-container" style="display:none;">
                 <canvas id="player1" class="player"></canvas>
@@ -187,27 +112,27 @@
                 <!-- <video src="video/video2.mp4" id="video2" width="100%" x-webkit-airplay="true" webkit-playsinline playsinline airplay="allow" x5-video-player-type="h5" data-type="spanish" class="iosPreload video" v-if="ios" style="display:none;" preload="false"></video> -->
                 <!-- <video src="video/video3.mp4" id="video3" width="100%" x-webkit-airplay="true" webkit-playsinline playsinline airplay="allow" x5-video-player-type="h5" data-type="wz" class="iosPreload video" v-if="ios" style="display:none;" preload="false"></video> -->
 
-                <img src="assets/images/p2-txt-hlbe.png" alt="" class="img1" style="display:none;">
-                <img src="assets/images/p2-txt-xby.png" alt="" class="img2" style="display:none;">
-                <img src="assets/images/p2-txt-wz.png" alt="" class="img3" style="display:none;">
+                <img data-src="assets/images/p2-txt-hlbe.png" alt="" class="img1 lazy" style="display:none;">
+                <img data-src="assets/images/p2-txt-xby.png" alt="" class="img2 lazy" style="display:none;">
+                <img data-src="assets/images/p2-txt-wz.png" alt="" class="img3 lazy" style="display:none;">
             </div>
 
              <div class="animation-box" style="display:none;"> 
-                <img src="assets/images/p1-zhezhao.png" alt="" class="content-bg">
+                <img data-src="assets/images/p1-zhezhao.png" alt="" class="content-bg lazy">
                 <div class="content-box">
-                    <img src="assets/images/p1-icon-1txt.png" alt="" class="tip tip1" style="display:none;" v-show="server_data.gameData.currentPoint=='hlbe'">
-                    <img src="assets/images/p1-icon-2txt.png" alt="" class="tip tip2" style="display:none;" v-show="server_data.gameData.currentPoint=='spanish'">
-                    <img src="assets/images/p1-icon-3txt.png" alt="" class="tip tip3" style="display:none;" v-show="server_data.gameData.currentPoint=='wz'">
-                    <img src="assets/images/p1-bx-txt.png" alt="" class="tip tip-all" style="display:none;">
+                    <img data-src="assets/images/p1-icon-1txt.png" alt="" class="tip tip1 lazy" style="display:none;" v-show="server_data.gameData.currentPoint=='hlbe'">
+                    <img data-src="assets/images/p1-icon-2txt.png" alt="" class="tip tip2 lazy" style="display:none;" v-show="server_data.gameData.currentPoint=='spanish'">
+                    <img data-src="assets/images/p1-icon-3txt.png" alt="" class="tip tip3 lazy" style="display:none;" v-show="server_data.gameData.currentPoint=='wz'">
+                    <img data-src="assets/images/p1-bx-txt.png" alt="" class="tip tip-all lazy" style="display:none;">
 
-                    <span class="number" v-show="key_index!=3">
+                    <span class="number">
                         $[key_index]
                     </span>
 
                     <!-- <img src="assets/images/p1-icon-1b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='hlbe'" style="display:none;"> -->
                     <!-- <img src="assets/images/p1-icon-2b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='spanish'" style="display:none;"> -->
                     <!-- <img src="assets/images/p1-icon-3b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='wz'" style="display:none;"> -->
-                     <img src="assets/images/p1-bx-baoxiang.png" alt="" class="big-icon" style="display:none;" @touchend.once="pwebgl_btn_getPrize"> 
+                     <img data-src="assets/images/p1-bx-baoxiang.png" alt="" class="big-icon lazy" style="display:none;" @touchend.once="pwebgl_btn_getPrize">
                 </div>
             </div>
         </div>
@@ -217,9 +142,9 @@
     <!--信息填写页-->
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
         <div class="container P_fill" v-show="pfill.visible" style="display:none;">
-            <img src="assets/images/bg3.jpg" alt="" class="pfill-bg">
+            <img data-src="assets/images/bg3.jpg" alt="" class="pfill-bg lazy">
             <div class="content-box">
-                <img src="assets/images/p5-infro.png" class="pfill-info">
+                <img data-src="assets/images/p5-infro.png" class="pfill-info lazy">
                 <div class="fill-box">
                     <div class="input-box">
                         <div class="name-box">
@@ -252,7 +177,7 @@
                 </div>
             </div>
             
-            <img src="assets/images/p11-btn.png" class="pfill-btn" @touchend="pfill_btn_submit">
+            <img data-src="assets/images/p11-btn.png" class="pfill-btn lazy" @touchend="pfill_btn_submit">
         </div>
     </transition>
 
@@ -260,8 +185,8 @@
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
         <div class="container P_address" v-show="paddress.visible" style="display:none;">
             <div class="paddress-box">
-                <img src="assets/images/kuang.png" class="paddress-bg">
-                <img src="assets/images/p5-rule.png" class="paddress-pic">
+                <img data-src="assets/images/kuang.png" class="paddress-bg lazy">
+                <img data-src="assets/images/p5-rule.png" class="paddress-pic lazy">
                 <div class="select-box">
                     <select class="ui-select1 province" @change="onPaddressProvinceChangeHandle($event)" v-model="server_data.select_province">
                         <option disabled value="">请选择省份</option>
@@ -283,41 +208,32 @@
                     </select>
                 </div>
                 <div class="paddress-xx" @touchend="onPaddress_btn_xx">
-                    <img src="assets/images/close.png" alt="">
+                    <img data-src="assets/images/close.png" alt="" class="lazy">
                 </div>
             </div>
         </div>
     </transition>
 
-
-
-
-    <!--<transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">-->
-        <!--<div class="container P_video animated" v-show="pvideo.visible">-->
-            <!--<video src="video/video.mp4?v51" id="video" width="100%" x-webkit-airplay="true" webkit-playsinline playsinline airplay="allow" x5-video-player-type="h5" class="iosPreload"></video>-->
-        <!--</div>-->
-    <!--</transition>-->
-
     <!--query-->
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
         <div class="container P_query" v-show="pquery.visible" style="display:none;">
             <div class="k">
-                <img src="assets/images/kuang.png" class="k-bg">
-                <img src="assets/images/p4-title.png" class="title">
-                <img src="assets/images/close.png" alt="" class="xx" @touchend="pquery_btn_xx">
-                <p class="shop-txt" v-if="server_data.prizeType!=1&&server_data.prizeType!=0">
+                <img data-src="assets/images/kuang.png" class="k-bg lazy">
+                <img data-src="assets/images/p4-title.png" class="title lazy">
+                <img data-src="assets/images/close.png" alt="" class="xx lazy" @touchend="pquery_btn_xx">
+                <p class="shop-txt" v-if="server_data.prizeType!=3&&server_data.prizeType!=0">
                     领取门店:$[server_data.myInfo.province]$[server_data.myInfo.city]$[server_data.myInfo.shop]
                 </p>
 
             
-                <img src="assets/images/p4-gift-1.png" alt="" class="prize-pic" v-if="server_data.prizeType==1">
-                <img src="assets/images/p4-gift-2.png" alt="" class="prize-pic" v-if="server_data.prizeType==2">
-                <img src="assets/images/p4-gift-3.png" alt="" class="prize-pic" v-if="server_data.prizeType==3">
-                <div class="btn-group2" v-if="server_data.prizeType==1">
-                    <img src="assets/images/p3-btn-2.png" alt="" class="btn btn1" @touchend="pquery_btn_paddress">
-                    <img src="assets/images/p3-btn-3.png" alt="" class="btn btn2" @touchend="pquery_btn_share">
+                <img data-src="assets/images/p4-gift-1.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==3">
+                <img data-src="assets/images/p4-gift-2.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==2">
+                <img data-src="assets/images/p4-gift-3.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==1">
+                <div class="btn-group2" v-show="server_data.prizeType==3">
+                    <img data-src="assets/images/p3-btn-2.png" alt="" class="btn btn1 lazy" @touchend="pquery_btn_paddress">
+                    <img data-src="assets/images/p3-btn-3.png" alt="" class="btn btn2 lazy" @touchend="pquery_btn_share">
                 </div>
-                <img src="assets/images/p3-btn-4.png" class="big-share" @touchend="pshare.visible=true" v-if="server_data.prizeType!=1&&server_data.prizeType!=0">
+                <img data-src="assets/images/p3-btn-4.png" class="big-share lazy" @touchend="pshare.visible=true" v-show="server_data.prizeType!=3&&server_data.prizeType!=0">
             </div>
         </div>
     </transition>
@@ -326,15 +242,15 @@
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
         <div class="container P_prize" v-show="pprize.visible" style="display:none;">
             <div class="k">
-                <img src="assets/images/kuang.png" class="k-bg">
-                <img src="assets/images/p3-title.png" class="title">
-                <img src="assets/images/p3-gift-1.png" alt="" class="prize-pic" v-if="server_data.prizeType==1">
-                <img src="assets/images/p3-gift-2.png" alt="" class="prize-pic" v-if="server_data.prizeType==2">
-                <img src="assets/images/p3-gift-3.png" alt="" class="prize-pic" v-if="server_data.prizeType==3">
+                <img data-src="assets/images/kuang.png" class="k-bg lazy">
+                <img data-src="assets/images/p3-title.png" class="title lazy">
+                <img data-src="assets/images/p3-gift-1.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==3">
+                <img data-src="assets/images/p3-gift-2.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==2">
+                <img data-src="assets/images/p3-gift-3.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==1">
                 <div class="btn-group2">
-                    <img src="assets/images/p3-btn-1.png" alt="" class="btn btn1" @touchend="pprize_btn_pfill" v-if="server_data.prizeType!=0&&server_data.prizeType!=1">
-                    <img src="assets/images/p3-btn-2.png" alt="" class="btn btn1" @touchend="pprize_btn_paddress" v-if="server_data.prizeType==1">
-                    <img src="assets/images/p3-btn-3.png" alt="" class="btn btn2" @touchend="pprize_btn_share">
+                    <img src="assets/images/p3-btn-1.png" alt="" class="btn btn1 lazy" @touchend="pprize_btn_pfill" v-show="server_data.prizeType!=0&&server_data.prizeType!=3">
+                    <img src="assets/images/p3-btn-2.png" alt="" class="btn btn1 lazy" @touchend="pprize_btn_paddress" v-show="server_data.prizeType==3">
+                    <img src="assets/images/p3-btn-3.png" alt="" class="btn btn2 lazy" @touchend="pprize_btn_share">
                 </div>
             </div>
         </div>
@@ -344,12 +260,13 @@
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-leave="after_leave_rule" @after-enter="after_enter_rule">
         <div class="container P_rule" v-show="prule.visible" style="display:none;">
             <div class="rule-box">
-                <img src="assets/images/rule-title.png" class="rule-title">
-                <img src="assets/images/kuang.png" class="rule-bg">
+                <img data-src="assets/images/close.png" alt="" class="xx lazy" @touchend="prule_btn_xx">
+                <img data-src="assets/images/rule-title.png" class="rule-title lazy">
+                <img data-src="assets/images/kuang.png" class="rule-bg lazy">
                 <div class="scroll-area">
-                    <img src="assets/images/rule.png" class="scroller">
+                    <img data-src="assets/images/rule.png" class="scroller lazy">
                 </div>
-                <img src="assets/images/rule-arrow.png" class="arrow opacity ani-arrow">
+                <img data-src="assets/images/rule-arrow.png" class="arrow opacity ani-arrow lazy">
             </div>
             
         </div>
@@ -359,18 +276,19 @@
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
         <div class="container P_guanzhu" v-show="pguanzhu.visible" style="display:none;">
             <div class="content-box">
-                <img src="assets/images/kuang.png" alt="" class="kuang">
-                <img src="assets/images/p5-txt.png" alt="" class="txt">
-                <img src="assets/images/p5-ewm.png" alt="" class="code">
+                <img data-src="assets/images/kuang.png" alt="" class="kuang lazy">
+                <img data-src="assets/images/p5-txt.png" alt="" class="txt lazy">
+                <img data-src="assets/images/p5-ewm.png" alt="" class="code lazy">
             </div>
         </div>
     </transition>
 
     <!--share-->
-    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="onPshareEnter">
         <div class="container P_share" v-show="pshare.visible" style="display:none;" @touchend="pshare.visible=false">
-            <img src="assets/images/share-bg.png" class="share-mask">
-            <img src="assets/images/share.png" alt="" class="share-pic">
+            <div class="share-gif ani-share"></div>
+            <img data-src="assets/images/share-bg.png" class="share-mask lazy">
+            <img data-src="assets/images/share.png" alt="" class="share-pic lazy">
         </div>
     </transition>
 
@@ -384,16 +302,16 @@
     <!--alert-->
     <transition enter-active-class="ani-fadeIn">
         <div class="container P_alert" v-show="palert.visible" style="display:none;">
-            <img src="assets/images/box.png" alt="" class="palert-bg">
+            <img data-src="assets/images/box.png" alt="" class="palert-bg lazy">
             <div class="alert-box alert-box1">
-                <div class="alert-xx" @touchend="closeAlert" v-show="palert.type!=palert.choice.fill">
+                <div class="alert-xx" @touchend="closeAlert" v-show="palert.type!=palert.choice.fill&&palert.type!=palert.choice.reg">
                     <img src="assets/images/close.png">
                 </div>
                 <p class="content" v-html="palert.content">
                     
                 </p>
-                <img src="assets/images/box-btn-2.png" alt="" class="btn btn1" v-show="palert.type == palert.choice.fill" @touchend="palert_btn_gofill">
-                <img src="assets/images/box-btn-1.png" alt="" class="btn btn1" v-show="palert.type == palert.choice.reg" @touchend="palert_btn_goregist">
+                <img data-src="assets/images/box-btn-2.png" alt="" class="btn btn1 lazy" v-show="palert.type == palert.choice.fill" @touchend="palert_btn_gofill">
+                <img data-src="assets/images/box-btn-1.png" alt="" class="btn btn1 lazy" v-show="palert.type == palert.choice.reg" @touchend="palert_btn_goregist">
             </div>
         </div>
     </transition>
@@ -417,13 +335,29 @@
 </div>
 
 <script src="js/jquery-3.2.1.min.js"></script>
+
+ <audio id="bgm" src="music/music.mp3" loop="true" class="iosPreload"></audio> 
+ <audio id="hl" src="music/hlbe.mp3" class="iosPreload video-bgm"></audio>
+ <audio id="sp" src="music/sp.mp3" class="iosPreload video-bgm"></audio>
+ <audio id="wz" src="music/wz.mp3" class="iosPreload video-bgm"></audio>
+
+<input type="hidden" id="is_end" value="1" /><!--活动是否结束-->
+<input type="hidden" id="have_guanzhu" value="1" /><!--是否关注-->
+<input type="hidden" id="is_vip" value="1" /><!--是否是vip-->
+<input type="hidden" id="goRegist" value="0" /><!--刚才去注册了一下-->
+<input type="hidden" id="prizeType" value="0" /><!--奖品类型-->
+<input type="hidden" id="haveFill" value="0" /><!--是否填写过信息-->
+<input type="hidden" id="gameData" value="" /><!--收集到的勋章-->
+
+<script src="js/vue.js"></script>
+<script src="js/three.min.js"></script>
 <script>
     var $container = $(".P_loading");
     var img = new Image();
     var width = window.innerWidth;
     var height = window.innerHeight;
-    img.src = "assets/images/star.png";
-    
+    img.src = "assets/images/star2.png";
+
     for(var i=0;i<30;i++){
         var $img = $(img).clone();
         var delay = 0;
@@ -436,46 +370,32 @@
         time = random>9?random:("0"+random)
         time = "time"+time;
         $img.css({
-            width:0.54*Math.random()+"rem",
+            width:THREE.Math.randFloat(0.3,0.6)+"rem",
             left:Math.random()*width,
             top:Math.random()*height,
             zIndex:2
-        }).addClass("opacity ani-star "+delay+" "+time)
-        $container.append($img)
+        }).addClass("opacity ani-star "+delay+" "+time);
+        $container.append($img);
+        $("#star-container").append($img.clone());
     }
 </script>
-
- <audio id="bgm" src="music/music.mp3" loop="true" class="iosPreload"></audio> 
- <audio id="hl" src="music/hlbe.mp3" class="iosPreload"></audio> 
- <audio id="sp" src="music/sp.mp3" class="iosPreload"></audio> 
- <audio id="wz" src="music/wz.mp3" class="iosPreload"></audio> 
-
-<input type="hidden" id="is_end" value="1" /><!--活动是否结束-->
-<input type="hidden" id="have_guanzhu" value="1" /><!--是否关注-->
-<input type="hidden" id="is_vip" value="1" /><!--是否是vip-->
-<input type="hidden" id="goRegist" value="0" /><!--刚才去注册了一下-->
-<input type="hidden" id="prizeType" value="1" /><!--奖品类型-->
-<input type="hidden" id="haveFill" value="1" /><!--是否填写过信息-->
-
-<script src="js/vue.js"></script>
-<script src="js/three.min.js"></script>
 <script src="js/OrbitControls.js"></script>
-<script src="js/DeviceOrientationControls.js"></script>
 <script src="js/MTLLoader.js"></script>
 <script src="js/OBJLoader.js"></script>
 <script src="js/DDSLoader.js"></script>
 <script src="js/TweenMax.min.js"></script>
-<script src="js/Detector.js"></script>
-<script src="js/stats.min.js"></script>
-<script src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<!--<script src="js/Detector.js"></script>-->
+<!--<script src="js/stats.min.js"></script>-->
+
 <script src="js/api.js"></script>
 <script src="js/canvasplayer.js"></script>
+<!--<script src="js/preload.js"></script>-->
 <script>
     var js;
     js = '<' + 'script ' + 'src=' + "js/index.js?v" + Math.random() + '>' + '</' + 'script' + '>'
     document.write(js)
 </script>
-
+<script src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
 
 </body>
 </html>

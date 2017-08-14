@@ -38,6 +38,8 @@
 .opacity.delay38,.animate.delay38 {-webkit-animation-delay: 3.8s;animation-delay: 3.8s;}
 .opacity.delay39,.animate.delay39 {-webkit-animation-delay: 3.9s;animation-delay: 3.9s;}
 .opacity.delay40,.animate.delay40 {-webkit-animation-delay: 4s;animation-delay: 4s;}
+.opacity.delay60,.animate.delay60 {-webkit-animation-delay: 6s;animation-delay: 6s;}
+.opacity.delay90,.animate.delay90 {-webkit-animation-delay: 9s;animation-delay: 9s;}
 
 .animate.ani-time01{  -webkit-animation-duration:0.1s;  animation-duration:0.1s;  }
 .animate.ani-time02{  -webkit-animation-duration:0.2s;  animation-duration:0.2s;  }
@@ -302,4 +304,126 @@
 .ani-arrow{
     -webkit-animation:ani-arrow 1.3s ease-Out 0s infinite forwards;
     animation:ani-arrow 1.3s ease-Out 0s infinite forwards;
+}
+
+
+@-webkit-keyframes ani-hand {
+    0%{
+        -webkit-transform:translateX(0);
+    }
+    70% {
+        -webkit-transform:translateX(2rem);
+    }
+}
+
+.ani-hand{
+    -webkit-animation:ani-hand 2.5s ease-Out 1s 2 forwards;
+    animation:ani-hand 2.5s ease-Out 1s 2 forwards;
+}
+
+ @-webkit-keyframes ani-shadow {
+    0%{
+        opacity:1
+    }
+    50%{
+        opacity:0
+    }
+    100% {
+        opacity:1
+    }
+}
+
+.ani-shadow{
+    -webkit-animation:ani-shadow 1.5s linear 0s infinite forwards;
+    animation:ani-shadow 1.5s linear 0s infinite forwards;
+} 
+
+@-webkit-keyframes ani-txt {
+    0%{
+        opacity:0
+    }
+    30%{
+        opacity:1
+    }
+    70%{
+        opacity:1
+    }
+    100% {
+        opacity:0
+    }
+}
+
+.ani-txt{
+    -webkit-animation:ani-txt 2s ease-out  1 forwards;
+    animation:ani-txt 2s ease-out  1 forwards;
+}
+
+
+@-webkit-keyframes ani-share {
+    0%{
+        background-position:0 0;
+    }
+    70%{
+        background-position:-19.02rem 0;
+    }
+    100%{
+        background-position:-19.02rem 0;
+    }
+}
+
+.ani-share{
+    -webkit-animation-name:ani-share;
+    -webkit-animation-duration: 1.2s;
+    /*-webkit-animation-timing-function: linear;*/
+    -webkit-animation-timing-function: steps(6,end);
+    /*-webkit-animation-delay: 2s;*/
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-direction: normal;
+    -webkit-animation-play-state: running;
+
+    animation-name:ani-share;
+    animation-duration: 1.2s;
+    /*animation-timing-function: linear;*/
+    animation-timing-function: steps(6,end);
+    /*animation-delay: 2s;*/
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+    animation-play-state: running;
+    /* Safari and Chrome: */
+}
+
+@-webkit-keyframes ani-stone {
+    0%{
+        -webkit-transform:translateY(0);
+    }
+    50%{
+        -webkit-transform:translateY(0.2rem);
+    }
+    100% {
+        -webkit-transform:translateY(0);
+    }
+}
+
+
+.ani-stone{
+    -webkit-animation:ani-stone 6s linear 0s infinite forwards;
+    animation:ani-stone 6s linear 0s infinite forwards;
+}
+
+@-webkit-keyframes ani-stone2 {
+    0%{
+        -webkit-transform:translateY(0);
+    }
+    50%{
+        -webkit-transform:translateY(0.2rem);
+    }
+    100% {
+        -webkit-transform:translateY(0);
+    }
+}
+
+
+.ani-stone2{
+    -webkit-animation:ani-stone2 5 linear 0.8s infinite forwards;
+    animation:ani-stone2 5s linear 0.8s infinite forwards;
 }

@@ -80,6 +80,7 @@ function ImageLoader(){
     this.haveload = 0;
     this.percent = 0;
     this.complete = false;
+    this.version = "?v1";
 }
 
 Object.assign( ImageLoader.prototype,{
@@ -119,7 +120,7 @@ Object.assign( ImageLoader.prototype,{
             }
             var img = new Image();
             img.onload = onLoad;
-            img.src = urls[_this.haveload].url;
+            img.src = urls[_this.haveload].url+_this.version;
 
 
         }
@@ -127,7 +128,7 @@ Object.assign( ImageLoader.prototype,{
         function start(){
             var img = new Image();
             img.onload = onLoad;
-            img.src = urls[_this.haveload].url;
+            img.src = urls[_this.haveload].url+_this.version;
         }
 
     }

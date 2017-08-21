@@ -163,11 +163,11 @@ img{position: absolute;}
             .loading-box{width:0.84rem;position:absolute;left:50%;margin-left:-0.42rem;top:8.8rem;}
                 .loading-box .loading-arr{width:0.84rem;position:static;}
                 .loading-box .num{width:0.64rem;height:0.3rem;line-height:0.3rem;color:white;position:absolute;left:0.1rem;top:50%;margin-top:-0.14rem;font-size:0.2rem;text-align:center;}
-        
+
         .P_share{z-index:120;}
             .share-mask{width:6.4rem;z-index:-1;top:0;}
             .share-pic{width:2.6rem;left:50%;margin-left:-1.3rem;top:2.4rem;}
-            .share-gif{width:3.17rem;height:2.55rem;position:absolute;right:0.5rem;background-image:url("../assets/images/share-gif.png");background-repeat: no-repeat;background-size:19.02rem;}
+            .share-gif{width:3.17rem;height:2.55rem;position:absolute;right:0.5rem;background-image:url("http://epshow.img.i-creative.cn/planet/assets/images/share-gif.png");background-repeat: no-repeat;background-size:19.02rem;}
 
         .P_guanzhu{}
             .P_guanzhu .content-box{width:5.16rem;height:8.06rem;position:absolute;left:50%;margin-left:-2.58rem;top:1rem;}
@@ -193,12 +193,12 @@ img{position: absolute;}
                 .rule-box .arrow{width:0.4rem;top:7.45rem;left:50%;margin-left:-0.2rem;z-index:2;}
         .P_prize{}
             .P_prize .xx{width: 0.4rem;right: 0.3rem;top: 0.3rem;}
-            .P_prize .prize-pic{width:4.26rem;left:50%;margin-left:-2.13rem;top:1.3rem;}  
+            .P_prize .prize-pic{width:4.26rem;left:50%;margin-left:-2.13rem;top:1.3rem;}
             .P_prize .btn-group2{left:50%;margin-left:-2.15rem;top:6.18rem;}
-        
+
         .P_query{}
             .P_query .xx{width:0.4rem;right:0.3rem;top:0.3rem;}
             .P_query p.shop-txt{width:4.9rem;position:absolute;left:50%;margin-left:-2.45rem;top:2rem;text-align:center;color:white;font-size:0.2rem;z-index:4;}
-            .P_query .prize-pic{width:4.26rem;left:50%;margin-left:-2.13rem;top:1.3rem;}  
+            .P_query .prize-pic{width:4.26rem;left:50%;margin-left:-2.13rem;top:1.3rem;}
             .P_query .btn-group2{left:50%;margin-left:-2.15rem;top:6.18rem;}
             .P_query .big-share{width:2.44rem;left:50%;margin-left:-1.22rem;top:6rem;}

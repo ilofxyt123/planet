@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="format-detection" content="telephone=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="apple-touch-fullscreen" content="yes"/>
+    <script src="http://epshow.img.i-creative.cn/planet/js/resetRem.js"></script>
+    
+    <script>
+        var css;
+        css = '<'+'link '+'href='+"css/common.css?v"+Math.random()+' rel='+"stylesheet "+'type='+"text/css"+'>';
+        document.write(css);
+        css = '<'+'link '+'href='+"css/index.css?v"+Math.random()+' rel='+"stylesheet "+'type='+"text/css"+'>';
+        document.write(css);
+        css = '<'+'link '+'href='+"css/animate.css?v"+Math.random()+' rel='+"stylesheet "+'type='+"text/css"+'>';
+        document.write(css);
+    </script>
+    <title>EP豐·啓之旅</title>
+</head>
+<body>
+
+<div id="iCreative">
+    <!--top-->
+    <div class="top">
+        <img src="http://epshow.img.i-creative.cn/planet/assets/images/logo.png" class="logo">
+        <img src="http://epshow.img.i-creative.cn/planet/assets/images/ruleicon.png" class="rule" @touchend="top_btn_rule" style="display:none;">
+    </div>
+
+    <!--bg-->
+    <div class="container P_bg" id="bg">
+        <div class="bg1">
+            <img src="http://epshow.img.i-creative.cn/planet/assets/images/loading-bg.jpg" class="bg-pic bg-pic1" id="translateBg">
+            <img src="http://epshow.img.i-creative.cn/planet/assets/images/loading-1.png" class="galaxy">
+        </div>
+        <div class="bg2" style="display:none;">
+            <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/bg2.jpg" alt="" class="bg-pic lazy">
+        </div>
+    </div>
+
+    <!--loading-->
+    <transition leave-active-class="ani-fadeOut">
+        <div class="container P_loading" v-show="ploading.visible" style="display:none;">
+            <!-- <img src="assets/images/star.png" class="star ani-star"> -->
+            <div class="text-box">
+                <img src="http://epshow.img.i-creative.cn/planet/assets/images/loading-txt-1.png" alt="" class="text text1 opacity ani-fadeIn">
+                <img src="http://epshow.img.i-creative.cn/planet/assets/images/loading-txt-2.png" alt="" class="text text2 opacity ani-fadeIn delay06">
+                <img src="http://epshow.img.i-creative.cn/planet/assets/images/loading-title-1.png" alt="" class="text text3 opacity ani-fadeIn delay12">
+            </div>
+            <img src="http://epshow.img.i-creative.cn/planet/assets/images/loading-txt.png" class="loading-txt opacity ani-fadeIn delay18">
+            <div class="loading-box">
+                <img src="http://epshow.img.i-creative.cn/planet/assets/images/loading-arrow.png" class="loading-arr">
+                <span class="num">100</span>
+            </div>
+        </div>
+    </transition>
+
+    <!--WEBGL-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="onPwebglEnter">
+        <div class="container P_webgl" v-show="pwebgl.visible" style="display:none;">
+            <div  style="z-index:-1;width:6.4rem;height:100%;position:absolute;" id="star-container">
+                <img id="sky-bg" src="http://epshow.img.i-creative.cn/planet/assets/images/skybg.jpg?v3" style="width:11.36rem;height:11.36rem;left:50%;margin-left:-5.68rem;top:50%;margin-top:-5.68rem;">
+                <img src="http://epshow.img.i-creative.cn/planet/assets/images/p1-stone1.png" class="stone1" style="display:none;">
+                <img src="http://epshow.img.i-creative.cn/planet/assets/images/p1-stone2.png" class="stone2" style="display:none;">
+            </div>
+            <div id="WebGL" class="gl-container">
+                <div id="FPS"></div>
+            </div>
+            <div id="gl-touch" style="width:100%;height:100%;position:absolute;z-index:8;"></div>
+            <div class="tip-box" style="display:none;">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-tishi.png" alt="" class="circle lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-hand.png" alt="" class="hand ani-hand lazy">
+            </div>
+
+            <div class="text-box">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-title-1.png" class="txt txt1 opacity ani-txt lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-title-2.png" class="txt txt2 opacity ani-txt delay30 lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-title-3.png" class="txt txt3 opacity ani-txt delay60 lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-title-4.png" class="txt txt4 opacity ani-txt delay90 lazy">
+            </div>
+
+            <div class="right-box">
+                <div class="icon-box icon-box1">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-1.png" class="icon lazy">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/icon-bg.png" class="icon lazy icon-bg" style="display:none;">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-1b.png" class="icon icon2 lazy" v-bind:class="server_data.gameData.hlbe.needAnimation?'icon-b':''" style="display:none;" v-show="server_data.gameData.hlbe.get">
+                </div>
+                <div class="icon-box icon-box2">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-2.png" class="icon lazy">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/icon-bg.png" class="icon lazy icon-bg" style="display:none;">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-2b.png" class="icon icon2 lazy" v-bind:class="server_data.gameData.spanish.needAnimation?'icon-c':''" style="display:none;" v-show="server_data.gameData.spanish.get">
+                </div>
+                <div class="icon-box icon-box3">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-3.png" class="icon lazy">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/icon-bg.png" class="icon lazy icon-bg" style="display:none;">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-3b.png" class="icon icon2 lazy" style="display:none;" v-bind:class="server_data.gameData.wz.needAnimation?'icon-d':''" v-show="server_data.gameData.wz.get">
+                </div>
+            </div>
+
+            <div class="long-press btn-box" style="display:none;">
+                <div class="shadow ani-shadow"></div>
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-txt-1.png" class="press-tip lazy">
+            </div>
+
+            <div class="query-box" v-show="server_data.prizeType!=0">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-bx-baoxiang.png" alt="" class="chaxun-btn lazy" @touchend="pwegbl_btn_chaxun">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-txt-2.png" alt="" class="query-txt lazy">
+            </div>
+
+            <div class="player-container" style="display:none;">
+                <canvas id="player1" class="player"></canvas>
+                <canvas id="player2" class="player"></canvas>
+
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p2-txt-hlbe.png" alt="" class="img1 lazy" style="display:none;">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p2-txt-xby.png" alt="" class="img2 lazy" style="display:none;">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p2-txt-wz.png" alt="" class="img3 lazy" style="display:none;">
+            </div>
+
+             <div class="animation-box" style="display:none;">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-zhezhao.png" alt="" class="content-bg lazy">
+                <div class="content-box">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-1txt.png" alt="" class="tip tip1 lazy" style="display:none;" v-show="server_data.gameData.currentPoint=='hlbe'">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-2txt.png" alt="" class="tip tip2 lazy" style="display:none;" v-show="server_data.gameData.currentPoint=='spanish'">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-icon-3txt.png" alt="" class="tip tip3 lazy" style="display:none;" v-show="server_data.gameData.currentPoint=='wz'">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-bx-txt.png" alt="" class="tip tip-all lazy" style="display:none;">
+
+                    <span class="number number1">
+                        $[key_index]
+                    </span>
+                    <span class="number number2">
+                        $[key_last]
+                    </span>
+
+                    <!-- <img src="assets/images/p1-icon-1b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='hlbe'" style="display:none;"> -->
+                    <!-- <img src="assets/images/p1-icon-2b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='spanish'" style="display:none;"> -->
+                    <!-- <img src="assets/images/p1-icon-3b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='wz'" style="display:none;"> -->
+                     <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p1-bx-baoxiang.png" alt="" class="big-icon lazy" style="display:none;" @touchend.once="pwebgl_btn_getPrize">
+                </div>
+            </div>
+        </div>
+    </transition>
+
+
+    <!--信息填写页-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+        <div class="container P_fill" v-show="pfill.visible" style="display:none;">
+            <div class="content-box">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/kuang.png" class="pfill-bg lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p5-infro.png" class="pfill-info lazy">
+                <div class="fill-box">
+                    <div class="input-box">
+                        <div class="name-box">
+                            <input type="text" id="name" class="ui-input-name" placeholder="姓名" v-model="server_data.name">
+                        </div>
+                        <div class="phone-box">
+                            <input type="tel" id="phone" class="ui-input-phone" placeholder="手机" v-model="server_data.tel" oninput="main.limitNum(this)">
+                        </div>
+                    </div>
+                    <div class="select-box">
+                        <select class="ui-select1 province" @change="onPfillProvinceChangeHandle($event)" v-model="server_data.select_province">
+                            <option disabled value="">请选择省份</option>
+                            <option v-for="data in server_data.province">
+                                $[data.province]
+                            </option>
+                        </select>
+                        <select class="ui-select1 city" @change="onPfillCityChangeHandle($event)" v-model="server_data.select_city">
+                            <option disabled value="">请选择城市</option>
+                            <option v-for="data in server_data.city">
+                                $[data.city]
+                            </option>
+                        </select>
+                        <select class="ui-select2 address" @change="onPfillAddressChangeHandle($event)" v-model="server_data.select_address">
+                            <option disabled value="">请选择门店</option>
+                            <option v-for="data in server_data.address" v-bind:shopid="data.id">
+                                $[data.name]
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p11-btn.png" class="pfill-btn lazy" @touchend="pfill_btn_submit">
+        </div>
+    </transition>
+
+    <!--查看可使用门店-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+        <div class="container P_address" v-show="paddress.visible" style="display:none;">
+            <div class="paddress-box">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/kuang.png" class="paddress-bg lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p5-rule.png" class="paddress-pic lazy">
+                <div class="select-box">
+                    <select class="ui-select1 province" @change="onPaddressProvinceChangeHandle($event)" v-model="server_data.select_province">
+                        <option disabled value="">请选择省份</option>
+                        <option v-for="data in server_data.province">
+                            $[data.province]
+                        </option>
+                    </select>
+                    <select class="ui-select1 city" @change="onPaddressCityChangeHandle($event)" v-model="server_data.select_city">
+                        <option disabled value="">请选择城市</option>
+                        <option v-for="data in server_data.city">
+                            $[data.city]
+                        </option>
+                    </select>
+                    <select class="ui-select2 address" @change="onPaddressAddressChangeHandle($event)" v-model="server_data.select_address">
+                        <option disabled value="">请选择门店</option>
+                        <option v-for="data in server_data.address" v-bind:shopid="data.id">
+                            $[data.name]
+                        </option>
+                    </select>
+                </div>
+                <div class="paddress-xx" @touchend="onPaddress_btn_xx">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/close2.png" alt="" class="lazy">
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!--query-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="afterEnterPprize" @after-leave="afterLeavePprize">
+        <div class="container P_query" v-show="pquery.visible" style="display:none;">
+            <div class="k">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/kuang.png" class="k-bg lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p4-title.png" class="title lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/close2.png" alt="" class="xx lazy" @touchend="pquery_btn_xx">
+                <p class="shop-txt" v-if="server_data.prizeType!=3&&server_data.prizeType!=0">
+                    领取门店:$[server_data.myInfo.province]$[server_data.myInfo.city]$[server_data.myInfo.shop]
+                </p>
+
+
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p4-gift-1.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==3">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p4-gift-2.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==2">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p4-gift-3.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==1">
+                <div class="btn-group2" v-show="server_data.prizeType==3">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-btn-2.png" alt="" class="btn btn1 lazy" @touchend="pquery_btn_paddress">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-btn-3.png" alt="" class="btn btn2 lazy" @touchend="pquery_btn_share">
+                </div>
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-btn-4.png" class="big-share lazy" @touchend="pshare.visible=true" v-show="server_data.prizeType!=3&&server_data.prizeType!=0">
+            </div>
+        </div>
+    </transition>
+
+    <!--pprize-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="afterEnterPprize" @after-leave="afterLeavePprize">
+        <div class="container P_prize" v-show="pprize.visible" style="display:none;">
+            <div class="k">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/close2.png" class="xx lazy" @touchend="pprize_btn_close" v-show="server_data.prizeType==3">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/kuang2.png" class="k-bg lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-title.png" class="title lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-gift-1.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==3">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-gift-2.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==2">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-gift-3.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==1">
+                <div class="btn-group2">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-btn-1.png" alt="" class="btn btn1 lazy" @touchend="pprize_btn_pfill" v-show="server_data.prizeType!=0&&server_data.prizeType!=3">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-btn-2.png" alt="" class="btn btn1 lazy" @touchend="pprize_btn_paddress" v-show="server_data.prizeType==3">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p3-btn-3.png" alt="" class="btn btn2 lazy" @touchend="pprize_btn_share">
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!--rule-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-leave="after_leave_rule" @after-enter="after_enter_rule">
+        <div class="container P_rule" v-show="prule.visible" style="display:none;">
+            <div class="rule-box">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/close2.png" alt="" class="xx lazy" @touchend="prule_btn_xx">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/rule-title.png" class="rule-title lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/kuang.png" class="rule-bg lazy">
+                <div class="scroll-area">
+                    <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/rule.png" class="scroller lazy">
+                </div>
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/rule-arrow.png" class="arrow opacity ani-arrow lazy">
+            </div>
+
+        </div>
+    </transition>
+
+    <!--guanzhu-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+        <div class="container P_guanzhu" v-show="pguanzhu.visible" style="display:none;">
+            <div class="content-box">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/kuang.png" alt="" class="kuang lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p5-txt.png" alt="" class="txt lazy">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/p5-ewm.png" alt="" class="code lazy">
+            </div>
+        </div>
+    </transition>
+
+    <!--share-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="onPshareEnter">
+        <div class="container P_share" v-show="pshare.visible" style="display:none;" @touchend="pshare.visible=false">
+            <div class="share-gif ani-share"></div>
+            <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/share-bg.png" class="share-mask lazy">
+            <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/share.png" alt="" class="share-pic lazy">
+        </div>
+    </transition>
+
+    <!--end-->
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+        <div class="container P_end" v-show="pend.visible" style="display:none;">
+
+        </div>
+    </transition>
+
+    <!--alert-->
+    <transition enter-active-class="ani-fadeIn">
+        <div class="container P_alert" v-show="palert.visible" style="display:none;">
+            <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/box.png" alt="" class="palert-bg lazy">
+            <div class="alert-box alert-box1">
+                <div class="alert-xx" @touchend="closeAlert" v-show="palert.type!=palert.choice.fill&&palert.type!=palert.choice.reg">
+                    <img src="http://epshow.img.i-creative.cn/planet/assets/images/close.png">
+                </div>
+                {literal}
+                <p class="content" v-html="palert.content" v-bind:style="{'font-size':palert.fontSize}">
+
+                </p>
+                {/literal}
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/box-btn-2.png" alt="" class="btn btn1 lazy" v-show="palert.type == palert.choice.fill" @touchend="palert_btn_gofill">
+                <img data-src="http://epshow.img.i-creative.cn/planet/assets/images/box-btn-1.png" alt="" class="btn btn1 lazy" v-show="palert.type == palert.choice.reg" @touchend="palert_btn_goregist">
+            </div>
+        </div>
+    </transition>
+
+
+    <!--hp-->
+    <div class="hp" v-show="hpwarn.visible" style="display:none;">
+        <div class="hp_box">
+            <img src="http://epshow.img.i-creative.cn/planet/assets/images/phone.png" class="phone">
+            <img src="http://epshow.img.i-creative.cn/planet/assets/images/weile.png" class="hp_tip">
+        </div>
+    </div>
+
+    <!--wait-->
+    <div class="container P_wait" v-show="pwait.visible" style="display:none;">
+        <div class="preloader-indicator-modal">
+            <span class="preloader preloader-white"></span>
+        </div>
+    </div>
+</div>
+
+<script src="http://epshow.img.i-creative.cn/planet/js/jquery-3.2.1.min.js"></script>
+
+ <audio id="bgm" src="http://epshow.video.i-creative.cn/planet/music/music.mp3" loop="true" class="iosPreload"></audio>
+ <audio id="hl" src="http://epshow.video.i-creative.cn/planet/music/hlbe.mp3" class="video-bgm"></audio>
+ <audio id="sp" src="http://epshow.video.i-creative.cn/planet/music/sp.mp3" class="video-bgm"></audio>
+ <audio id="wz" src="http://epshow.video.i-creative.cn/planet/music/wz.mp3" class="video-bgm"></audio>
+
+<input type="hidden" id="is_end" value="{$is_end}" /><!--活动是否结束-->
+<input type="hidden" id="have_guanzhu" value="{$is_follow}" /><!--是否关注-->
+<input type="hidden" id="is_vip" value="{$is_vip}" /><!--是否是vip-->
+<input type="hidden" id="goRegist" value="{$is_reg}" /><!--刚才去注册了一下-->
+<input type="hidden" id="prizeType" value="{$lottery_result}" /><!--奖品类型-->
+<input type="hidden" id="haveFill" value="{$is_award}" /><!--是否填写过信息-->
+<input type="hidden" id="gameData" value="{$collect_key}" /><!--收集到的勋章-->
+
+<input type="hidden" id="nickname" value="{$nickname}" />
+<input type="hidden" id="openid" value="{$openid}" />
+<input type="hidden" id="appId" value="{$signPackage.appId}" />
+<input type="hidden" id="timestamp" value="{$signPackage.timeStamp}" />
+<input type="hidden" id="nonceStr" value="{$signPackage.nonceStr}" />
+<input type="hidden" id="signature" value="{$signPackage.signature}" />
+
+<script src="http://epshow.img.i-creative.cn/planet/js/vue.min.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/three.min.js"></script>
+{literal}
+<script>
+    var $container = $(".P_loading");
+    var img = new Image();
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    img.src = "http://epshow.img.i-creative.cn/planet/assets/images/star2.png";
+
+    for(var i=0;i<30;i++){
+        var $img = $(img).clone();
+        var delay = 0;
+        var random = parseInt(Math.random()*40);
+        delay = random>9?random:("0"+random)
+        delay = "delay"+delay;
+
+        var time = 0;
+        var random = parseInt(Math.random()*40);
+        time = random>9?random:("0"+random)
+        time = "time"+time;
+        $img.css({
+            width:THREE.Math.randFloat(0.3,0.6)+"rem",
+            left:Math.random()*width,
+            top:Math.random()*height,
+            zIndex:2
+        }).addClass("opacity ani-star "+delay+" "+time);
+        $container.append($img);
+        $("#star-container").append($img.clone());
+    }
+</script>
+{/literal}
+<script src="http://epshow.img.i-creative.cn/planet/js/OrbitControls.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/DeviceOrientationControls.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/MTLLoader.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/OBJLoader.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/DDSLoader.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/TweenMax.min.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/api.js?v1"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/canvasplayer.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/index.js?v5"></script>
+
+
+<script src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+<script src="http://epshow.img.i-creative.cn/planet/js/wxShare.js?v9"></script>
+<script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?3e114b6291c19c47c078993332241214";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+</body>
+</html>

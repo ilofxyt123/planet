@@ -49,6 +49,7 @@
                 <img src="assets/images/loading-txt-2.png" alt="" class="text text2 opacity ani-fadeIn delay06">
                 <img src="assets/images/loading-title-1.png" alt="" class="text text3 opacity ani-fadeIn delay12">
             </div>
+            <img src="assets/images/loading-txt.png" class="loading-txt opacity ani-fadeIn delay18">
             <div class="loading-box">
                 <img src="assets/images/loading-arrow.png" class="loading-arr">
                 <span class="num">100</span>
@@ -60,9 +61,9 @@
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="onPwebglEnter">
         <div class="container P_webgl" v-show="pwebgl.visible" style="display:none;">
             <div  style="z-index:-1;width:6.4rem;height:100%;position:absolute;" id="star-container">
-                <img id="sky-bg" src="assets/images/skybg.jpg?v2" style="width:11.36rem;height:11.36rem;left:50%;margin-left:-5.68rem;top:50%;margin-top:-5.68rem;">
-                <img src="assets/images/p1-stone1.png" class="stone1 ani-stone">
-                <img src="assets/images/p1-stone2.png" class="stone2 ani-stone2">
+                <img id="sky-bg" src="assets/images/skybg.jpg?v3" style="width:11.36rem;height:11.36rem;left:50%;margin-left:-5.68rem;top:50%;margin-top:-5.68rem;">
+                <img src="assets/images/p1-stone1.png" class="stone1" style="display:none;">
+                <img src="assets/images/p1-stone2.png" class="stone2" style="display:none;">
             </div>
             <div id="WebGL" class="gl-container">
                 <div id="FPS"></div>
@@ -83,21 +84,24 @@
             <div class="right-box">
                 <div class="icon-box icon-box1">
                     <img data-src="assets/images/p1-icon-1.png" class="icon lazy">
-                    <img data-src="assets/images/p1-icon-1b.png" class="icon icon2 lazy" v-bind:class="server_data.gameData.hlbe.needAnimation?'icon-b':''" style="display:none;" v-show="server_data.gameData.hlbe.get">
+                    <img data-src="assets/images/icon-bg.png" class="icon lazy icon-bg" style="display:none;">
+                    <img data-src="assets/images/p1-icon-1b.png?v4" class="icon icon2 lazy" v-bind:class="server_data.gameData.hlbe.needAnimation?'icon-b':''" style="display:none;" v-show="server_data.gameData.hlbe.get">
                 </div>
                 <div class="icon-box icon-box2">
                     <img data-src="assets/images/p1-icon-2.png" class="icon lazy">
-                    <img data-src="assets/images/p1-icon-2b.png" class="icon icon2 lazy" v-bind:class="server_data.gameData.spanish.needAnimation?'icon-c':''" style="display:none;" v-show="server_data.gameData.spanish.get">
+                    <img data-src="assets/images/icon-bg.png" class="icon lazy icon-bg" style="display:none;">
+                    <img data-src="assets/images/p1-icon-2b.png?v4" class="icon icon2 lazy" v-bind:class="server_data.gameData.spanish.needAnimation?'icon-c':''" style="display:none;" v-show="server_data.gameData.spanish.get">
                 </div>
                 <div class="icon-box icon-box3">
                     <img data-src="assets/images/p1-icon-3.png" class="icon lazy">
-                    <img data-src="assets/images/p1-icon-3b.png" class="icon icon2 lazy" style="display:none;" v-bind:class="server_data.gameData.wz.needAnimation?'icon-d':''" v-show="server_data.gameData.wz.get">
+                    <img data-src="assets/images/icon-bg.png" class="icon lazy icon-bg" style="display:none;">
+                    <img data-src="assets/images/p1-icon-3b.png?v4" class="icon icon2 lazy" style="display:none;" v-bind:class="server_data.gameData.wz.needAnimation?'icon-d':''" v-show="server_data.gameData.wz.get">
                 </div>
             </div>
 
             <div class="long-press btn-box" style="display:none;">
                 <div class="shadow ani-shadow"></div>
-                <img data-src="assets/images/p1-txt-1.png" class="press-tip lazy">
+                <img src="assets/images/p1-txt-1.png?v1" class="press-tip lazy">
             </div>
 
             <div class="query-box" v-show="server_data.prizeType!=0">
@@ -108,9 +112,7 @@
             <div class="player-container" style="display:none;">
                 <canvas id="player1" class="player"></canvas>
                 <canvas id="player2" class="player"></canvas>
-                <!-- <video src="video/video1.mp4" id="video1" width="100%" x-webkit-airplay="true" webkit-playsinline playsinline airplay="allow" x5-video-player-type="h5" data-type="hlbe" class="iosPreload video" v-if="ios" style="display:none;" preload="false"></video> -->
-                <!-- <video src="video/video2.mp4" id="video2" width="100%" x-webkit-airplay="true" webkit-playsinline playsinline airplay="allow" x5-video-player-type="h5" data-type="spanish" class="iosPreload video" v-if="ios" style="display:none;" preload="false"></video> -->
-                <!-- <video src="video/video3.mp4" id="video3" width="100%" x-webkit-airplay="true" webkit-playsinline playsinline airplay="allow" x5-video-player-type="h5" data-type="wz" class="iosPreload video" v-if="ios" style="display:none;" preload="false"></video> -->
+
 
                 <img data-src="assets/images/p2-txt-hlbe.png" alt="" class="img1 lazy" style="display:none;">
                 <img data-src="assets/images/p2-txt-xby.png" alt="" class="img2 lazy" style="display:none;">
@@ -125,8 +127,11 @@
                     <img data-src="assets/images/p1-icon-3txt.png" alt="" class="tip tip3 lazy" style="display:none;" v-show="server_data.gameData.currentPoint=='wz'">
                     <img data-src="assets/images/p1-bx-txt.png" alt="" class="tip tip-all lazy" style="display:none;">
 
-                    <span class="number">
+                    <span class="number number1">
                         $[key_index]
+                    </span>
+                    <span class="number number2">
+                        $[key_last]
                     </span>
 
                     <!-- <img src="assets/images/p1-icon-1b.png" alt="" class="big-icon" v-show="server_data.gameData.currentPoint=='hlbe'" style="display:none;"> -->
@@ -142,8 +147,8 @@
     <!--信息填写页-->
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
         <div class="container P_fill" v-show="pfill.visible" style="display:none;">
-            <img data-src="assets/images/bg3.jpg" alt="" class="pfill-bg lazy">
             <div class="content-box">
+                <img data-src="assets/images/kuang.png" class="pfill-bg lazy">
                 <img data-src="assets/images/p5-infro.png" class="pfill-info lazy">
                 <div class="fill-box">
                     <div class="input-box">
@@ -208,19 +213,19 @@
                     </select>
                 </div>
                 <div class="paddress-xx" @touchend="onPaddress_btn_xx">
-                    <img data-src="assets/images/close.png" alt="" class="lazy">
+                    <img data-src="assets/images/close2.png" alt="" class="lazy">
                 </div>
             </div>
         </div>
     </transition>
 
     <!--query-->
-    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="afterEnterPprize" @after-leave="afterLeavePprize">
         <div class="container P_query" v-show="pquery.visible" style="display:none;">
             <div class="k">
                 <img data-src="assets/images/kuang.png" class="k-bg lazy">
                 <img data-src="assets/images/p4-title.png" class="title lazy">
-                <img data-src="assets/images/close.png" alt="" class="xx lazy" @touchend="pquery_btn_xx">
+                <img data-src="assets/images/close2.png" alt="" class="xx lazy" @touchend="pquery_btn_xx">
                 <p class="shop-txt" v-if="server_data.prizeType!=3&&server_data.prizeType!=0">
                     领取门店:$[server_data.myInfo.province]$[server_data.myInfo.city]$[server_data.myInfo.shop]
                 </p>
@@ -239,10 +244,11 @@
     </transition>
 
     <!--pprize-->
-    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut">
+    <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-enter="afterEnterPprize" @after-leave="afterLeavePprize">
         <div class="container P_prize" v-show="pprize.visible" style="display:none;">
             <div class="k">
-                <img data-src="assets/images/kuang.png" class="k-bg lazy">
+                <img src="assets/images/close2.png" class="xx lazy" @touchend="pprize_btn_close" v-show="server_data.prizeType==3">
+                <img data-src="assets/images/kuang2.png" class="k-bg lazy">
                 <img data-src="assets/images/p3-title.png" class="title lazy">
                 <img data-src="assets/images/p3-gift-1.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==3">
                 <img data-src="assets/images/p3-gift-2.png" alt="" class="prize-pic lazy" v-show="server_data.prizeType==2">
@@ -260,7 +266,7 @@
     <transition enter-active-class="ani-fadeIn" leave-active-class="ani-fadeOut" @after-leave="after_leave_rule" @after-enter="after_enter_rule">
         <div class="container P_rule" v-show="prule.visible" style="display:none;">
             <div class="rule-box">
-                <img data-src="assets/images/close.png" alt="" class="xx lazy" @touchend="prule_btn_xx">
+                <img data-src="assets/images/close2.png" alt="" class="xx lazy" @touchend="prule_btn_xx">
                 <img data-src="assets/images/rule-title.png" class="rule-title lazy">
                 <img data-src="assets/images/kuang.png" class="rule-bg lazy">
                 <div class="scroll-area">
@@ -307,7 +313,7 @@
                 <div class="alert-xx" @touchend="closeAlert" v-show="palert.type!=palert.choice.fill&&palert.type!=palert.choice.reg">
                     <img src="assets/images/close.png">
                 </div>
-                <p class="content" v-html="palert.content">
+                <p class="content" v-html="palert.content" v-bind:style="{'font-size':palert.fontSize}">
                     
                 </p>
                 <img data-src="assets/images/box-btn-2.png" alt="" class="btn btn1 lazy" v-show="palert.type == palert.choice.fill" @touchend="palert_btn_gofill">
@@ -315,7 +321,6 @@
             </div>
         </div>
     </transition>
-
 
 
     <!--hp-->
@@ -337,11 +342,12 @@
 <script src="js/jquery-3.2.1.min.js"></script>
 
  <audio id="bgm" src="music/music.mp3" loop="true" class="iosPreload"></audio> 
- <audio id="hl" src="music/hlbe.mp3" class="iosPreload video-bgm"></audio>
- <audio id="sp" src="music/sp.mp3" class="iosPreload video-bgm"></audio>
- <audio id="wz" src="music/wz.mp3" class="iosPreload video-bgm"></audio>
+ <audio id="hl" src="music/hlbe.mp3" class="video-bgm"></audio>
+ <audio id="sp" src="music/sp.mp3" class="video-bgm"></audio>
+ <audio id="wz" src="music/wz.mp3" class="video-bgm"></audio>
+ <audio id="water" src="music/water.mp3"></audio>
 
-<input type="hidden" id="is_end" value="1" /><!--活动是否结束-->
+<input type="hidden" id="is_end" value="0" /><!--活动是否结束-->
 <input type="hidden" id="have_guanzhu" value="1" /><!--是否关注-->
 <input type="hidden" id="is_vip" value="1" /><!--是否是vip-->
 <input type="hidden" id="goRegist" value="0" /><!--刚才去注册了一下-->

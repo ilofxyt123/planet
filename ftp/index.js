@@ -289,6 +289,64 @@ $.extend(Scroll.prototype,{//是否深度合并，二级同名对象进行合并
         this.$scrollObj.off("webkitTransitionEnd");
     },
 });
+function ImageLoader(){
+    this.total = 0;
+    this.haveload = 0;
+    this.percent = 0;
+    this.complete = false;
+    this.version = ""
+}
+Object.assign( ImageLoader.prototype,{
+
+    load: function( urls, onEveryLoad, onComplete){
+        var result = {
+            0:[]
+        };
+
+        this.total = urls.length;
+
+        var _this = this;
+
+        start();
+
+        function onLoad( e ){
+
+            if( Object.prototype.hasOwnProperty.call( urls[_this.haveload], "group" ) ){
+                var group = urls[_this.haveload].group;
+                if(result[group] instanceof Array == false){
+                    result[group] = [];
+                }
+                result[group].push(this)
+            }else{
+                result[0].push( this );
+            }
+
+            _this.haveload++;
+            _this.percent = Math.floor(_this.haveload/_this.total*100);
+            onEveryLoad(_this.percent);
+            this.onload = null;
+
+            if(_this.percent == 100){
+                _this.complete = true;
+                onComplete(result)
+                return;
+            }
+            var img = new Image();
+            img.onload = onLoad;
+            img.src = urls[_this.haveload].url+_this.version;
+
+
+        }
+
+        function start(){
+            var img = new Image();
+            img.onload = onLoad;
+            img.src = urls[_this.haveload].url+_this.version;
+        }
+
+    }
+
+});
 var Utils = new function(){
     this.preloadImage = function(ImageURL,callback,realLoading){
         var rd = realLoading||false;
@@ -304,7 +362,7 @@ var Utils = new function(){
                         $num.html(num);
                     }
                     if (main.loader.haveLoad == main.loader.total) {
-                            callback && callback()
+                        callback && callback()
                     }
                 };
                 img.onerror = function() {};
@@ -379,6 +437,13 @@ var Utils = new function(){
         }
     };
 };
+if(Utils.browser("ios")){
+    var dom =
+        "<video src='http://epshow.video.i-creative.cn/planet/video/hlbe.mp4' id='video1' width='100%' x-webkit-airplay='true' webkit-playsinline playsinline airplay='allow' x5-video-player-type='h5' data-type='hlbe' class='iosPreload video' v-if='ios' style='display:none;' loop='true'></video>"+
+        "<video src='http://epshow.video.i-creative.cn/planet/video/spanish.mp4' id='video2' width='100%' x-webkit-airplay='true' webkit-playsinline playsinline airplay='allow' x5-video-player-type='h5' data-type='spanish' class='iosPreload video' v-if='ios' style='display:none;' loop='true'></video>"+
+        "<video src='http://epshow.video.i-creative.cn/planet/video/wz.mp4' id='video3' width='100%' x-webkit-airplay='true' webkit-playsinline playsinline airplay='allow' x5-video-player-type='h5' data-type='wz' class='iosPreload video' v-if='ios' style='display:none;' loop='true'></video>"
+    $(".player-container").append( dom );
+}
 var Media = new function(){
     this.mutedEnd = false;
     this.WxMediaInit=function(){
@@ -529,21 +594,24 @@ var options = {
         prule:{
             visible:false,
         },
+
         palert:{
             visible:false,
             type:"",
             choice:{
                 fill:"fill",
                 normal:"normal",
-                reg:"reg"
+                reg:"reg",
             },
+            fontSize:"",
             content:"",//主文字
             title:"",//标题
             txt: {
-                fill:"你还未填写领奖信息，赶快去填写吧",
+                fill:"你还未填写领奖信息，<br>赶快去填写吧",
                 reg:"为了确保星球领奖者的真实性,<br>系统需要进行实名认证,<br>请填写个人真实信息领取奖品!"
             }
         },
+        isResult:false,
         hpwarn:{
             visible:false,
         },
@@ -597,6 +665,8 @@ var options = {
             //关注
             if(!this.server_data.have_guanzhu){
                 this.pguanzhu.visible = true;
+                this.pwebgl.visible = false;
+                main.stopRender();
                 return;
             }
             //vip
@@ -607,12 +677,23 @@ var options = {
                 return;
             }
 
+            if(this.server_data.is_end){
+                this.palert.type = this.palert.choice.normal;
+                this.palert.content = "本次活动已结束<br>期待EP雅莹更多活动<br>记得关注“EP雅莹官方微信”<br>敬请期待我们的下次活动";
+                this.palert.visible = true;
+                $(".animation-box").fo();
+                return;
+            }
+
             var _vm = this;
             var callback = function( data ){
                 if( data.status ){
                     _vm.server_data.prizeType = data.lottery_result;
                     _vm.pprize.visible = true;
                     _vm.pwebgl.visible = false;
+                    setTimeout(function(){
+                        $(".animation-box").hide();
+                    },1000)
                     main.stopRender();
                 }else{
                     console.log( "抽奖后台出问题了"+data )
@@ -622,6 +703,14 @@ var options = {
         },
 
                                                         /*中奖结果页*/
+        afterEnterPprize:function(){
+            this.isResult = true;
+            init_weixin_share();
+        },
+        afterLeavePprize:function(){
+            this.isResult = false;
+            init_weixin_share()
+        },
         pprize_btn_paddress:function(){
             this.paddress.visible = true;
         },/*中奖结果页*/
@@ -631,6 +720,11 @@ var options = {
         pprize_btn_pfill:function(){
             this.pfill.visible = true;
             this.pprize.visible = false;
+        },
+        pprize_btn_close:function(){
+            main.startRender();
+            this.pprize.visible = false;
+            this.pwebgl.visible = true;
         },
                                                         /*中奖查询页*/
         pquery_btn_paddress:function(){
@@ -752,15 +846,18 @@ var options = {
             //     delay:1000
             // })
         },
-        openAlert:function(type,content){
+        openAlert:function(type,content,fontSize){
+            var fontSize = fontSize?fontSize:"";
             this.palert.type = type;
             this.palert.content = content;
             this.palert.visible = true;
+            this.palert.fontSize = fontSize;
         },
         closeAlert:function(){
             this.palert.visible = false;
             this.palert.type = "";
             this.palert.content = "";
+            this.palert.fontSize = "";
         },
     },
     computed:{
@@ -774,6 +871,9 @@ var options = {
             }
             return number;
         },
+        key_last:function(){
+            return (3-this.key_index)
+        }
     },
     delimiters: ['$[', ']']
 }
@@ -797,7 +897,7 @@ three.init = function(){
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(45,this.width/this.height,0.1,300000);
+    this.camera = new THREE.PerspectiveCamera(45,this.width/this.height,0.1,10000);
     this.camera.position.y = 50;
     this.camera.position.z = 1600;
 
@@ -807,8 +907,8 @@ three.init = function(){
     this.scene2 = new THREE.Scene();
 
 
-    this.renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
-    // this.renderer.setPixelRatio(window.devicePixelRatio);//移动端为了性能，关闭此功能
+    this.renderer = new THREE.WebGLRenderer({antialias:true,alpha:true,precision:"highp"});
+    this.renderer.setPixelRatio(window.devicePixelRatio);//移动端为了性能，关闭此功能
     this.renderer.setSize(this.width,this.height);
     // this.renderer.setClearColor(0x000000,1);
     this.renderer.autoClear = false;
@@ -854,7 +954,7 @@ three.loadOBJ = function(config){
 
 
         webgl.OBJData[config.modelName].obj = group;//存入到全局OBJ数据中
-        
+
 
         if(webgl.OBJData[config.modelName].needTouch){//根据需要加入touch搜索列表
             webgl.touchObjects.push(object);
@@ -863,8 +963,8 @@ three.loadOBJ = function(config){
         main.loader.haveLoad++;
         var completePercent = Math.round(main.loader.haveLoad/main.loader.total*100);
         $(".num").html(100-completePercent)
-        if(main.loader.haveLoad == main.loader.total ){     
-                main.loadCallBack();          
+        if(main.loader.haveLoad == main.loader.total ){
+                main.loadCallBack();
         }
     },function(progress){
         // console.log(progress)
@@ -1131,7 +1231,7 @@ three.onresize = function(){
 
     this.camera.aspect = this.width/this.height;
     this.camera.updateProjectionMatrix();
-    
+
     this.ocamera.left = -this.width/2;
     this.ocamera.right = this.width/2;
     this.ocamera.top = this.height/2;
@@ -1161,7 +1261,7 @@ var webgl = new function(){
         complete:false,
     };
 
-    this.assetsUrl = "assets/"
+    this.assetsUrl = "http://epshow.img.i-creative.cn/planet/assets/";
 
     this.picUrl = this.assetsUrl+"images/";//图片路径
     this.texturePath = this.assetsUrl+"images/"; //纹理路径
@@ -1175,9 +1275,9 @@ var webgl = new function(){
     this.OBJData = {
         scene:{
             name:"scene",
-            baseUrl:"assets/",
-            mtlFile:"models/scene/scene.mtl",
-            objFile:"assets/models/scene/scene.obj",
+            baseUrl:this.assetsUrl,
+            mtlFile:this.assetsUrl+"models/scene/scene.mtl",
+            objFile:this.assetsUrl+"models/scene/scene.obj",
             // texture:"assets/models/scene/scene.png",
 
             position:{x:0,y:0,z:0},
@@ -1207,10 +1307,14 @@ var webgl = new function(){
             obj:undefined,
             frames:"hlbe",
             width:224,
-            height:44,
+            height:224,
             img:$(".player-container .img1"),
             music:$("#hl")[0],
-            icon:$(".right-box .icon2").eq(0)
+            icon:$(".right-box .icon2").eq(0),
+            icon_bg:$(".icon-box1 .icon-bg"),
+            video:$("#video1"),
+            video_haveload:false,
+            // smallBgm:$("#water")
         },
         spanish:{
             name:"spanish",
@@ -1218,11 +1322,15 @@ var webgl = new function(){
             position:new THREE.Vector3(340/SQ3,340/SQ3,340/SQ3),
             obj:undefined,
             frames:"spanish",
-            width:225,
-            height:48,
+            width:224,
+            height:224,
             img:$(".player-container .img2"),
             music:$("#sp")[0],
-            icon:$(".right-box .icon2").eq(1)
+            icon:$(".right-box .icon2").eq(1),
+            icon_bg:$(".icon-box2 .icon-bg"),
+            video:$("#video2"),
+            video_haveload:false,
+            // smallBgm:$("#water")
         },
         wz:{
             name:"wz",
@@ -1231,10 +1339,14 @@ var webgl = new function(){
             obj:undefined,
             frames:"wz",
             width:224,
-            height:48,
+            height:224,
             img:$(".player-container .img3"),
             music:$("#wz")[0],
-            icon:$(".right-box .icon2").eq(2)
+            icon:$(".right-box .icon2").eq(2),
+            icon_bg:$(".icon-box3 .icon-bg"),
+            video:$("#video3"),
+            video_haveload:false,
+            // smallBgm:$("#water")
         }
     };
     this.currentPointName = "";
@@ -1249,7 +1361,7 @@ var webgl = new function(){
     //星星
     this.stars = undefined;
 
-    
+
     //云+地球的整体
     this.earthGroup = undefined;
     //纹理序列
@@ -1275,16 +1387,15 @@ webgl.load = function(){
         //     baseUrl:config.baseUrl,
         // })
         three.loadOBJ({
-           modelName:config.name, 
+           modelName:config.name,
            objFile:config.objFile,
             callback:function(group){
-                console.log(group)
                 webgl.stone1 = group.children[0];
-                webgl.stone2 = group.children[1]; 
+                webgl.stone2 = group.children[1];
                 webgl.liusu_up = group.children[2];
                 webgl.liusu_center = group.children[3];
                 webgl.planet = group.children[4];
-                
+
                 // object.children[0].material = material;
             }
         })
@@ -1297,9 +1408,10 @@ webgl.loadCallback = function(){
     // }
     for(var i=1;i<=38;i++){
         var texture = three.loadTexture({
-                            url:main.modelsUrl+"scene/ls/"+i+".png"
-                        })
+            url:main.modelsUrl+"scene/ls/"+i+".png"
+        });
 
+        // var texture = new THREE.Texture(main.ls[i-1]);
         this.earthChangeTexture.push(texture)
     }
     this.addAmbientLight();//加环境光
@@ -1342,7 +1454,7 @@ webgl.addDirectionLight = function(){
 
 };//加平行光
 webgl.addOrbit = function(){
-    this.orbit = new THREE.OrbitControls( three.camera , three.renderer.domElement);
+    this.orbit = new THREE.OrbitControls( three.camera , $("#gl-touch")[0]);
     this.orbit.enableZoom = true;
     this.orbit.target = webgl.earthGroup.position;
 };//加控制器
@@ -1353,21 +1465,18 @@ webgl.addEarth = function(){
     var group = new THREE.Group();
     group.scale.set(0,0,0);
     group.position.set(0,50,-200)
-    group.rotation.y = 4*Math.PI
+    group.rotation.y = 2*Math.PI
     var material = new THREE.MeshPhongMaterial({
-                        map:three.loadTexture({
-                            url:"assets/models/scene/planet.png",
-                        }),
-                        normalMap:three.loadTexture({
-                            url:"assets/models/scene/normal_planet.png",
-                        }),
-                        shininess:20,
-                        // specular:0x888888,
-                        emissive:0x111111,
-                        emissiveIntensity:0,
-                    });
-
-
+        map:three.loadTexture({
+            url:this.assetsUrl+"models/scene/planet.png",
+        }),
+        normalMap:three.loadTexture({
+            url:this.assetsUrl+"models/scene/normal_planet.png",
+        }),
+        shininess:20,
+        emissive:0x111111,
+        emissiveIntensity:0,
+    });
     this.planet.material = material;
 
     group.add(this.planet)
@@ -1380,11 +1489,11 @@ webgl.addEarth = function(){
     //                         url:"assets/models/scene/normal_stone1.png",
     //                     }),
     //                     shininess:30,
-                    
+
     //                 });
     // this.stone1.material = material1;
     // group.add( this.stone1 );
-        
+
     // var material2 = new THREE.MeshPhongMaterial({
     //                 map:three.loadTexture({
     //                     url:"assets/models/scene/stone2.png",
@@ -1398,32 +1507,35 @@ webgl.addEarth = function(){
     // group.add( this.stone2 );
 
     var material3 = new THREE.MeshLambertMaterial({
-                    color:"white",
-                    map:three.loadTexture({
-                        url:"assets/models/scene/ls/1.png",
-                    }),
-                    side:THREE.DoubleSide,
-                   depthWrite:false,
-                   transparent:true,
-                   opacity:0.9
-                });
+        color:"white",
+        map:three.loadTexture({
+            url:this.assetsUrl+"models/scene/ls/1.png",
+        }),
+        side:THREE.DoubleSide,
+        depthWrite:false,
+        transparent:true,
+        opacity:0.8
+    });
     this.liusu_up.material = material3;
     this.liusu_up.scale.set(1.01,1.01,1.01)
+    this.liusu_up.rotation.set(2,2,2)
+
     group.add( this.liusu_up )
 
     var material4 = new THREE.MeshLambertMaterial({
-                    color:"white",
-                    map:three.loadTexture({
-                        url:"assets/models/scene/ls/1.png",
-                    }),
-                    side:THREE.DoubleSide,
-                   depthWrite:false,
-                   transparent:true,
-                   opacity:0.9
-                });
+        color:"white",
+        map:three.loadTexture({
+            url:this.assetsUrl+"models/scene/ls/1.png",
+        }),
+        side:THREE.DoubleSide,
+        depthWrite:false,
+        transparent:true,
+        opacity:0.8
+    });
     this.liusu_center.material = material4;
     this.liusu_center.scale.set(1.01,1.01,1.01)
-    group.add(this.liusu_center)
+    this.liusu_center.rotation.set(1.01,1.01,1.01)
+    group.add(this.liusu_center);
 
 
     // group.add(cloudMesh);
@@ -1432,30 +1544,24 @@ webgl.addEarth = function(){
 
     for(point in this.PointData){
         var points = this.PointData;
-        var point = points[point]; 
-        
+        var point = points[point];
+
         point.texture= three.loadTexture({
             url:point.texture
         })
 
-        var RedPoint = new THREE.Mesh(new THREE.PlaneGeometry(point.width,point.height),new THREE.MeshBasicMaterial({map:point.texture,transparent:true,}))
-
-        var geo = new THREE.Geometry();
-        geo.vertices.push( point.position );
         var RedPoint2 = new THREE.Sprite(new THREE.SpriteMaterial({map:point.texture,depthWrite:false}))
-        
+
         RedPoint2.position.set( point.position.x, point.position.y, point.position.z )
-        RedPoint2.scale.set(point.width*1.5,point.width*1.5,1)
+        RedPoint2.scale.set(point.width*1.3,point.width*1.3,1)
         group.add(RedPoint2);
         RedPoint2.name = point.name;
         point.obj = RedPoint2;
     }
-
-
 };//加地球
 webgl.addStars = function(){
     var texture = three.loadTexture({
-        url:main.picUrl+"star2.png"
+        url:this.picUrl+"star2.png"
     })
     var mat = new THREE.SpriteMaterial({
         map:texture,
@@ -1556,7 +1662,7 @@ webgl.updateTexture = function(){
     this.liusu_center.material.map = this.earthChangeTexture[this.textureIndex];
     this.liusu_up.material.map = this.earthChangeTexture[this.textureIndex];
     this.liusu_center.material.needsUpdate = true;
-    this.liusu_up.material.needsUpdate = true;  
+    this.liusu_up.material.needsUpdate = true;
 
     this.liusu_center.rotation.x+=0.001;
     this.liusu_center.rotation.y+=0.001;
@@ -1577,7 +1683,7 @@ webgl.updateTexture = function(){
 };
 webgl.rotateToCenter = function(){
     var camera_pos = new THREE.Vector3().copy( three.camera.position );
-            
+
     var min_distance = undefined;//最近的点与相机的距离，用点的世界坐标
     var min_obj = undefined;//最近的点的mesh
 
@@ -1603,18 +1709,18 @@ webgl.rotateToCenter = function(){
     }
 
 
-    if(!main.frames[webgl.currentPointName].load_complete&&main.frames[webgl.currentPointName].once){//图片没加载过
-        main.frames[webgl.currentPointName].once = false;
-        main.player1.loop = true;
-        main.loadFrames( main.frames[webgl.currentPointName], function(){
-            main.player1.repeat = 0;
-        })
-    }
+    // if(!main.frames[webgl.currentPointName].load_complete&&main.frames[webgl.currentPointName].once){//图片没加载过
+    //     main.frames[webgl.currentPointName].once = false;
+    //     main.player1.loop = true;
+    //     main.loadFrames( main.frames[webgl.currentPointName], function(){
+    //         main.player1.repeat = 0;
+    //     })
+    // }
 
 
 
     var pointPos = new THREE.Vector3().copy(min_obj.getWorldPosition())//球心到红点方向向量
-   
+
     var PointToOVec = new THREE.Vector3().subVectors( pointPos, this.earthGroup.position )
     var CameraToOvec = new THREE.Vector3().subVectors( camera_pos, this.earthGroup.position )
 
@@ -1630,6 +1736,7 @@ webgl.rotateToCenter = function(){
     var new_quaternion = new THREE.Quaternion();
 
     var obj = { t : 0 };
+
     TweenMax.to( obj, 1,{ t:1,onUpdate:function(){
         THREE.Quaternion.slerp( q2, q1, new_quaternion,obj.t);
         webgl.earthGroup.quaternion.set( new_quaternion.x, new_quaternion.y, new_quaternion.z, new_quaternion.w)
@@ -1637,53 +1744,50 @@ webgl.rotateToCenter = function(){
         if(main.touch.isTouch){
             main.stage = 2;
             main.player1.direction = 1;
-            if(false){
-                main.player1.repeat = 1;
-                main.player1.callback1 = function(){
-                    main.stage = 3;
-                    $(main.frames[webgl.currentPointName].video).show();
-                    $("#player1").fo();
-                    main.frames[webgl.currentPointName].video.play();
-                    webgl.PointData[webgl.currentPointName].img.fi();
-                };
-            }else{//安卓
-                var callback1 = function(){
-                    main.stage = 3;
-                    $("#player1").fo();
+            main.player1.repeat = 0;
+
+            var callback1 = function(){
+                main.stage = 3;
+                $("#player1").fo();
+                webgl.PointData[webgl.currentPointName].img.fi();
+                if( vm.server_data.gameData[webgl.currentPointName].get == false){
+                    _uploadData.uploadGameData(function(data){console.log(data)})
+                    webgl.PointData[webgl.currentPointName].icon.css({
+                        opacity:0,
+                    });
+                    vm.server_data.gameData[webgl.currentPointName].get = true;
+                    vm.server_data.gameData[webgl.currentPointName].needAnimation = true;
+                }//get勋章
+
+                if(vm.ios){
+                    webgl.PointData[webgl.currentPointName].video.show();
+                    webgl.PointData[webgl.currentPointName].video[0].play();
+                }else{
+                    // if(!main.frames[webgl.currentPointName].load_complete){//图片没加载过
+                    //     main.player1.loop = true;
+                    // }else{
+                    //     main.player1.repeat = 0;
+                    // }
                     $("#player2").show();
                     main.player2.init( main.frames[webgl.currentPointName].urls )
                     main.player2.repeat = 0;
                     main.player2.callback1 = function(){
-                        if( vm.server_data.gameData[webgl.currentPointName].get == false){
-                            _uploadData.uploadGameData(function(data){console.log(data)})
-                            webgl.PointData[webgl.currentPointName].icon.css({
-                                opacity:0,
-                            })
-                            vm.server_data.gameData[webgl.currentPointName].get = true;
-                            vm.server_data.gameData[webgl.currentPointName].needAnimation = true;
-                        }
-                        main.player2.set( 0 )
+                        main.player2.set( 0 );
                         main.player2.play();
                         webgl.PointData[webgl.currentPointName].music.currentTime = 0;
                         webgl.PointData[webgl.currentPointName].music.play();
-                    }
+                    };
                     main.player2.play();
-                    webgl.PointData[webgl.currentPointName].img.fi();
                     webgl.PointData[webgl.currentPointName].music.play();
-                };
-                main.player1.callback1 = callback1;
-                // if(!main.frames[webgl.currentPointName].load_complete){//图片没加载过
-                //     main.player1.loop = true;
-                // }else{
-                //     main.player1.repeat = 0;
-                // }
-            }
-            
+                }
+            };
+            main.player1.callback1 = callback1;
+
             $("#player1").show()
             $(".player-container").fi();
             main.player1.play();
             main.stopRender();
-            
+
         }
     }})
 };
@@ -1692,12 +1796,12 @@ webgl.rotateEarth = function(){
 };
 
 webgl.render = function(){
-        this.clock.startTime = Date.now();
-        if(this.clock.startTime - this.clock.oldTime >50) {
-            this.updateTexture();
-            this.clock.oldTime = this.clock.startTime;
-        }
-        this.rotateEarth();
+    this.clock.startTime = Date.now();
+    if(this.clock.startTime - this.clock.oldTime >50) {
+        this.updateTexture();
+        this.clock.oldTime = this.clock.startTime;
+    }
+    this.rotateEarth();
 };
 
 /***********************main***********************/
@@ -1739,105 +1843,166 @@ var main = new function(){
         obj:document.getElementById("video")
     };
     this.tl_galaxy = undefined;
-    this.assetsUrl = "assets/";
-    // this.assetsUrl = "http://epshow.img.i-creative.cn/planet/assets/"
+    // this.assetsUrl = "assets/";
+    this.assetsUrl = "http://epshow.img.i-creative.cn/planet/assets/";
     this.picUrl = this.assetsUrl+"images/";//图片路径
     this.textureUrl = this.assetsUrl+"texture/";//天空盒路径
     this.modelsUrl =this.assetsUrl+"models/";//模型基础路径
-    this.videoUrl = "video/";//视频序列帧路径
+    this.videoUrl = "http://epshow.img.i-creative.cn/planet/video/";//视频序列帧路径
+
+    this.RAF = undefined;
+
     this.ImageList = [
-        this.modelsUrl+"scene/planet.png",
-        this.modelsUrl+"scene/normal_planet.png",
-        // this.modelsUrl+"scene/stone1.png",
-        // this.modelsUrl+"scene/normal_stone1.png",
-        // this.modelsUrl+"scene/stone2.png",
-        // this.modelsUrl+"scene/normal_stone2.png",
-
-        // this.textureUrl+"left.jpg",
-        // this.textureUrl+"right.jpg",
-        // this.textureUrl+"up.jpg",
-        // this.textureUrl+"down.jpg",
-        // this.textureUrl+"front.jpg",
-        // this.textureUrl+"back.jpg",
-
-        this.picUrl+"bg2.jpg",
-        this.picUrl+"bg3.jpg",
-        this.picUrl+"box.png",
-        this.picUrl+"box-btn-1.png",
-        this.picUrl+"box-btn-2.png",
-        this.picUrl+"close.png",
-        this.picUrl+"hl.png",
-        this.picUrl+"kuang.png",
-        this.picUrl+"liuxing.png",
-        this.picUrl+"loading-1.png",
-        this.picUrl+"loading-arrow.png",
-        this.picUrl+"loading-bg.jpg",
-        this.picUrl+"loading-title-1.png",
-        this.picUrl+"loading-txt-1.png",
-        this.picUrl+"loading-txt-2.png",
-        this.picUrl+"logo.png",
-        this.picUrl+"p1-btn.png",
-        this.picUrl+"p1-bx-baoxiang.png",
-        this.picUrl+"p1-bx-txt.png",
-        this.picUrl+"p1-icon-1.png",
-        this.picUrl+"p1-icon-1b.png",
-        this.picUrl+"p1-icon-1txt.png",
-        this.picUrl+"p1-icon-2.png",
-        this.picUrl+"p1-icon-2b.png",
-        this.picUrl+"p1-icon-2txt.png",
-        this.picUrl+"p1-icon-3.png",
-        this.picUrl+"p1-icon-3b.png",
-        this.picUrl+"p1-icon-3txt.png",
-        this.picUrl+"p1-miaozhun.png",
-        this.picUrl+"p1-stone1.png",
-        this.picUrl+"p1-stone2.png",
-        this.picUrl+"p1-txt-1.png",
-        this.picUrl+"p1-txt-2.png",
-        this.picUrl+"p1-zhezhao.png",
-        this.picUrl+"p2-txt-hlbe.png",
-        this.picUrl+"p2-txt-wz.png",
-        this.picUrl+"p2-txt-xby.png",
-        this.picUrl+"p3-btn-1.png",
-        this.picUrl+"p3-btn-2.png",
-        this.picUrl+"p3-btn-3.png",
-        this.picUrl+"p3-btn-4.png",
-        this.picUrl+"p3-gift-1.png",
-        this.picUrl+"p3-gift-2.png",
-        this.picUrl+"p3-gift-3.png",
-        this.picUrl+"p3-title.png",
-        this.picUrl+"p4-gift-1.png",
-        this.picUrl+"p4-gift-2.png",
-        this.picUrl+"p4-gift-3.png",
-        this.picUrl+"p4-title.png",
-        this.picUrl+"p5-ewm.png",
-        this.picUrl+"p5-infro.png",
-        this.picUrl+"p5-rule.png",
-        this.picUrl+"p5-txt.png",
-        this.picUrl+"p11-btn.png",
-        this.picUrl+"p11-kuang.png",
-        this.picUrl+"phone.png",
-        this.picUrl+"rule.png",
-        this.picUrl+"rule-arrow.png",
-        this.picUrl+"rule-title.png",
-        this.picUrl+"ruleicon.png",
-        this.picUrl+"share.png",
-        this.picUrl+"share-bg.png",
-        this.picUrl+"sp.png",
-        this.picUrl+"star.png",
-        this.picUrl+"star2.png",
-        this.picUrl+"weile.png",
-        this.picUrl+"wz.png",
+        {
+            url:this.modelsUrl+"scene/planet.png",
+        }, {
+            url:this.modelsUrl+"scene/normal_planet.png",
+        },{
+            url:this.picUrl+"bg2.jpg",
+        },{
+            url:this.picUrl+"box.png",
+        },{
+            url:this.picUrl+"box-btn-1.png",
+        },{
+            url:this.picUrl+"box-btn-2.png",
+        },{
+            url:this.picUrl+"close.png",
+        },{
+            url:this.picUrl+"hl.png",
+        },{
+            url:this.picUrl+"kuang.png",
+        },{
+            url:this.picUrl+"liuxing.png",
+        },{
+            url:this.picUrl+"loading-1.png",
+        },{
+            url:this.picUrl+"loading-arrow.png",
+        },{
+            url:this.picUrl+"loading-bg.jpg",
+        },{
+            url:this.picUrl+"loading-title-1.png",
+        },{
+            url:this.picUrl+"loading-txt-1.png",
+        },{
+            url:this.picUrl+"loading-txt-2.png",
+        },{
+            url:this.picUrl+"logo.png",
+        },{
+            url:this.picUrl+"p1-btn.png",
+        },{
+            url:this.picUrl+"p1-bx-baoxiang.png",
+        },{
+            url:this.picUrl+"p1-bx-txt.png",
+        },{
+            url:this.picUrl+"p1-icon-1.png",
+        },{
+            url:this.picUrl+"p1-icon-1b.png",
+        },{
+            url:this.picUrl+"p1-icon-1txt.png",
+        },{
+            url:this.picUrl+"p1-icon-2.png",
+        },{
+            url:this.picUrl+"p1-icon-2b.png",
+        },{
+            url:this.picUrl+"p1-icon-2txt.png",
+        },{
+            url:this.picUrl+"p1-icon-3.png",
+        },{
+            url:this.picUrl+"p1-icon-3b.png",
+        },{
+            url:this.picUrl+"p1-icon-3txt.png",
+        },{
+            url:this.picUrl+"p1-miaozhun.png",
+        },{
+            url:this.picUrl+"p1-stone1.png",
+        },{
+            url:this.picUrl+"p1-stone2.png",
+        },{
+            url:this.picUrl+"p1-txt-1.png",
+        },{
+            url:this.picUrl+"p1-txt-2.png",
+        },{
+            url:this.picUrl+"p1-zhezhao.png",
+        },{
+            url:this.picUrl+"p2-txt-hlbe.png",
+        },{
+            url:this.picUrl+"p2-txt-wz.png",
+        },{
+            url:this.picUrl+"p2-txt-xby.png",
+        },{
+            url:this.picUrl+"p3-btn-1.png",
+        },{
+            url:this.picUrl+"p3-btn-2.png",
+        },{
+            url:this.picUrl+"p3-btn-3.png",
+        },{
+            url:this.picUrl+"p3-btn-4.png",
+        },{
+            url:this.picUrl+"p3-gift-1.png",
+        },{
+            url:this.picUrl+"p3-gift-2.png",
+        },{
+            url:this.picUrl+"p3-title.png",
+        },{
+            url:this.picUrl+"p4-gift-1.png",
+        },{
+            url:this.picUrl+"p4-gift-2.png",
+        },{
+            url:this.picUrl+"p4-gift-3.png",
+        },{
+            url:this.picUrl+"p4-title.png",
+        },{
+            url:this.picUrl+"p5-ewm.png",
+        },{
+            url:this.picUrl+"p5-infro.png",
+        },{
+            url:this.picUrl+"p5-rule.png",
+        },{
+            url:this.picUrl+"p5-txt.png",
+        },{
+            url:this.picUrl+"p11-btn.png",
+        },{
+            url:this.picUrl+"p11-kuang.png",
+        },{
+            url:this.picUrl+"phone.png",
+        },{
+            url:this.picUrl+"rule.png",
+        },{
+            url:this.picUrl+"rule-arrow.png",
+        },{
+            url:this.picUrl+"rule-title.png",
+        },{
+            url:this.picUrl+"ruleicon.png",
+        },{
+            url:this.picUrl+"share.png",
+        },{
+            url:this.picUrl+"share-bg.png",
+        },{
+            url:this.picUrl+"sp.png",
+        },{
+            url:this.picUrl+"star.png",
+        },{
+            url:this.picUrl+"star2.png",
+        },{
+            url:this.picUrl+"weile.png",
+        },{
+            url:this.picUrl+"wz.png",
+        },
     ];
     this.clouds = [];
-    for(var i=1;i<=38;i++){
-        this.ImageList.push(this.modelsUrl+"scene/ls/"+i+".png")
-    }
-
     for(var i=1;i<=25;i++){
-        this.clouds.push(this.picUrl+"cloud/"+i+".jpg");
+        var obj = {};
+        obj.url = this.picUrl+"cloud/"+i+".jpg";
+        obj.group = "clouds";
+        this.ImageList.push(obj)
     }
-    this.ImageList = new Array().concat(this.ImageList,this.clouds)
-    this.RAF = undefined;
+    this.ls = [];
+    for(var i=1;i<=38;i++){
+        var obj = {};
+        obj.url = this.modelsUrl+"scene/ls/"+i+".png";
+        obj.group = "ls";
+        this.ImageList.push(obj)
+    }
 
     this.loader = {
         haveLoad:0,
@@ -1871,18 +2036,29 @@ var main = new function(){
         }
     }
 
-    for(var i=1;i<=124;i++){
-        this.frames.hlbe.urls.push(this.videoUrl+"hlbe/"+i+".jpg");
-    }
-    for(var i=1;i<=124;i++){
-        this.frames.spanish.urls.push(this.videoUrl+"spanish/"+i+".jpg");
-    }
-    for(var i=1;i<=151;i++){
-        this.frames.wz.urls.push(this.videoUrl+"wz/"+i+".jpg");
+    if(!vm.ios){
+        for(var i=1;i<=124;i++){
+            var obj = {};
+            obj.url = this.videoUrl+"hlbe/"+i+".jpg";
+            obj.group = "hlbe";
+            this.ImageList.push(obj)
+        }
+        for(var i=1;i<=124;i++){
+            var obj = {};
+            obj.url = this.videoUrl+"spanish/"+i+".jpg";
+            obj.group = "spanish";
+            this.ImageList.push(obj)
+        }
+        for(var i=1;i<=151;i++){
+            var obj = {};
+            obj.url = this.videoUrl+"wz/"+i+".jpg";
+            obj.group = "wz";
+            this.ImageList.push(obj)
+        }
     }
 
     this.stage = 1;//当前阶段1
-    
+
 };
 main.init=function(){
     // this.TranslateBg();
@@ -1897,7 +2073,7 @@ main.init=function(){
         }else{
             console.log( result )
         }
-    }
+    };
     _getData.getProvince( callback );//获得省份
 
     (function(){
@@ -1924,7 +2100,6 @@ main.init=function(){
 
     _getData.getVipInfo(callback);//获取vip
 
-
     var callback = function(data){
         if(data.status == 1 && data.data.lottery_result && data.data.is_award){
             vm.server_data.myInfo.province = data.data.shop.province;
@@ -1936,7 +2111,7 @@ main.init=function(){
             console.log(data)
         }
     };
-    _getData.getMyInfo(callback);//获取vip
+    _getData.getMyInfo(callback);//获取个人填写的门店
 
 };
 main.start=function(){
@@ -1949,20 +2124,44 @@ main.start=function(){
 
     },3000)
 
-    setTimeout(function(){
-        Utils.preloadImage(main.ImageList,function(){
+    // setTimeout(function(){
+    //     Utils.preloadImage(main.ImageList,function(){
+    //         main.loadCallBack();
+    //     },true);
+    //     webgl.load();
+    // },500)
+
+    var loader = new ImageLoader();
+    loader.load(this.ImageList,function( percent ){
+        main.loader.haveLoad++;
+        var percent = Math.floor(main.loader.haveLoad/main.loader.total*100)
+        $(".num").html(100-percent)
+    },function( result ){
+        main.clouds = result.clouds;
+
+        if(!vm.ios){//安卓的序列帧
+            main.frames.hlbe.urls = result.hlbe;
+            main.frames.hlbe.load_complete = true;
+
+            main.frames.spanish.urls = result.spanish;
+            main.frames.spanish.load_complete = true;
+
+            main.frames.wz.urls = result.wz;
+            main.frames.wz.load_complete = true;
+        }
+
+        main.ls = result.ls;
+        if(main.loader.haveLoad==main.loader.total){
             main.loadCallBack();
-            webgl.load();
-        },true);
-    },500)
+        }
+
+    });
+    webgl.load();
 
 
 
 };
 main.TranslateBg = function(){
-    w = window.innerWidth;
-    h = window.innerHeight;
-
     var config = {
         speed:2,
         obj:$("#sky-bg"),
@@ -1977,13 +2176,12 @@ main.TranslateBg = function(){
         nowX:0,
         nowY:0,
     };
-    console.log(config)
     this.orient = new Orienter();
     this.orient.onOrient = function(data){
         if(config.lastGamma){
             config.offsetGamma = data.g - config.lastGamma;
 
-            if(Math.abs(config.offsetGamma)<20){
+            if(8<Math.abs(config.offsetGamma)<30){
                 if( config.nowX + (config.offsetGamma/30) > config.xMax){//右边界
                     config.nowX = config.xMax;
                 }else if(config.nowX + (config.offsetGamma/30) < config.xMin){
@@ -1996,7 +2194,7 @@ main.TranslateBg = function(){
         if(config.lastBeta){
             config.offsetBeta = data.b - config.lastBeta;
 
-            if(Math.abs(config.offsetBeta)<20){
+            if(8<Math.abs(config.offsetBeta)<30){
                 if( config.nowY + (config.offsetBeta/30) > config.yMax){//右边界
                     config.nowY = config.yMax;
                 } else if( config.nowY + (config.offsetBeta/30) < config.yMin){//左边界
@@ -2033,11 +2231,11 @@ main.loadCallBack = function(){
 
     this.TranslateBg();
 
-    for(var i = 0;i<this.clouds.length;i++){
-        var img = new Image();
-        img.src = this.clouds[i];
-        this.clouds[i] = img;
-    }
+    // for(var i = 0;i<this.clouds.length;i++){
+    //     var img = new Image();
+    //     img.src = this.clouds[i];
+    //     this.clouds[i] = img;
+    // }
     this.player1 = new Player("player1");
     this.player1.init(this.clouds);
     this.player1.callback2 = function(){//退出过度动画后重新开始回调 + 清理当前点的名字
@@ -2050,9 +2248,11 @@ main.loadCallBack = function(){
             setTimeout(function(){
                 $(".animation-box").fo();
                 webgl.PointData[webgl.currentPointName].icon.css({
-                    transform:"translate3d(0,0,0) scale(1)",
+                    transform:"translate3d(0,0,0)",
+                    width:"0.5rem"
+                    // transform:"translate3d(0,0,0) scale(1)",
                 })
-            },1000)
+            },2000)
         }else{
             webgl.currentPointName = "";
             vm.server_data.gameData.currentPoint = "";
@@ -2060,18 +2260,18 @@ main.loadCallBack = function(){
         $(".player-container").fo(function(){
             $("#player1").hide();
         });
-        
+
 
     };
-    // if(!vm.ios){
-    if(true){
+    if(!vm.ios){
         main.player2 = new Player("player2");
         main.player2.speed = 80;
     }
     if(!vm.server_data.haveFill&&vm.server_data.prizeType!=0){
         var type = vm.palert.choice.fill;
         var content = vm.palert.txt[type];
-        vm.openAlert( type, content );
+        var fontSize = "0.26rem";
+        vm.openAlert( type, content, fontSize);
 
         vm.ploading.visible = false;
 
@@ -2086,7 +2286,7 @@ main.loadCallBack = function(){
 
         var callback = function( data ){
             if( data.status ){
-                vm.server_data.prizeType = data.data;
+                vm.server_data.prizeType = data.lottery_result;
                 vm.pprize.visible = true;
                 vm.ploading.visible = false;
             }else{
@@ -2111,7 +2311,7 @@ main.loadCallBack = function(){
         $(".bg1").fo();
         $(".bg2").fi();
         $(".rule").show();
-    },2000)
+    },1000)
 
     // vm.pshare.visible = true;
     // vm.pend.visible = true;
@@ -2124,37 +2324,52 @@ main.loadCallBack = function(){
     //         vm.pprize.visible = true;
     //         vm.server_data.prizeType = data.data;
     //     }
-        
+
     // })
 
     // vm.pquery.visible = true;
 
-        // var type = vm.palert.choice.reg;
-        // var content = vm.palert.txt[type];
-        // vm.openAlert( type, content );
+    // var type = vm.palert.choice.reg;
+    // var content = vm.palert.txt[type];
+    // vm.openAlert( type, content );
 
     setTimeout(function(){
-        TweenLite.to(webgl.earthGroup.position,4,{x:0,y:50,z:0,ease:"Linear.easeNone"})
-        TweenLite.to(webgl.earthGroup.scale,4,{x:1,y:1,z:1,ease:"Linear.easeNone",onComplete:function(){
-            $(".P_webgl .tip-box").fi();
-        }})
-        // TweenMax.to(three.camera.rotation,4,{x:0,y:0,z:0,ease:"Linear.easeNone"})
-        TweenLite.to(webgl.earthGroup.rotation,4,{x:0,y:2 * Math.PI,z:0,ease:"Linear.easeNone",onComplete:function(){
+        TweenLite.to(webgl.earthGroup.position,4,{x:0,y:50,z:0,ease:"Linear.easeNone",onComplete:function(){
             webgl.orbit.enabled = true;
+            var clock = undefined;
             var onTouchstartPwebgl = function(){
+                clearTimeout(clock);
                 $(this).off("touchstart");
-                setTimeout(function(){
-                    $(".P_webgl .tip-box").fo(function(){
-                        $(".long-press").fi();
-                    });
-                },1000)
+                $(".P_webgl .tip-box").fo();
+                $(".long-press").fi();
             };
             $(".P_webgl").on("touchstart",onTouchstartPwebgl);
+
+            $(".P_webgl .tip-box").fi(function(){
+                $(".P_webgl .tip-box").addClass("ani-tip");
+                clock = setTimeout(function(){
+                    $(".P_webgl .tip-box").removeClass("ani-tip").fo();
+                    $(".long-press").fi();
+                    $(".P_webgl").off("touchstart");
+                },2500)
+            });
+
             TweenLite.to(webgl.earthGroup.rotation,6,{x:0,y:0,z:0,ease:"Power2.easeOut",onCompele:function(){
 
             }})
-        }})
-    },2000)
+        }});
+        TweenLite.to(webgl.earthGroup.scale,4,{x:1,y:1,z:1,ease:"Linear.easeNone",onComplete:function(){
+
+        }});
+
+        $(".stone1").addClass("ani-scaleToBig").show();
+        $(".stone2").addClass("ani-scaleToBig").show();
+        setTimeout(function(){
+            $(".stone1").removeClass("ani-scaleToBig").addClass("ani-stone");
+            $(".stone2").removeClass("ani-scaleToBig").addClass("ani-stone2");
+        },6000)
+
+    },1500)
 };
 main.initLX = function( option ){
     var $img = $("<img>").attr("src",this.picUrl+"liuxing.png").addClass("lx");
@@ -2177,44 +2392,44 @@ main.initLX = function( option ){
     },500)
 
 
-     function createLX(){
-         var randDelay = Math.random()*option.delay;
-         var choseX =(Math.random()-0.5)>0?true:false;
+    function createLX(){
+        var randDelay = Math.random()*option.delay;
+        var choseX =(Math.random()-0.5)>0?true:false;
 
-         var left;
-         var top;
+        var left;
+        var top;
 
-         var img_w = THREE.Math.randInt(50,80);
-         var img_h = img_w*scale;
+        var img_w = THREE.Math.randInt(50,80);
+        var img_h = img_w*scale;
 
 
 
-         var duration = THREE.Math.randFloat(1,2.5)+"s"
+        var duration = THREE.Math.randFloat(1,2.5)+"s"
 
-         if(choseX){
-             left = three.width;
-             top = THREE.Math.randInt(0,three.height);
-         }else{
+        if(choseX){
+            left = three.width;
+            top = THREE.Math.randInt(0,three.height);
+        }else{
             top = img_h*=-1;
             left = THREE.Math.randInt(three.width/2,three.width)
-         }
+        }
 
-         var lx = $img.clone();
-         $(lx).on("transitionend",onTransitionEnd).css({
-             width:img_w+"px",
-             left:left+"px",
-             top:top+"px",
-             transition:"transform "+duration+" linear"
-         });
-         $container.append(lx);
-         setTimeout(function(){
-             var x = -(left+img_w)+"px";
-             var y = (left+img_w)*scale+"px";
-             lx.css({
-                 transform:"translate3d("+x+","+y+",0)"
-             })
-         },randDelay)
-     }
+        var lx = $img.clone();
+        $(lx).on("transitionend",onTransitionEnd).css({
+            width:img_w+"px",
+            left:left+"px",
+            top:top+"px",
+            transition:"transform "+duration+" linear"
+        });
+        $container.append(lx);
+        setTimeout(function(){
+            var x = -(left+img_w)+"px";
+            var y = (left+img_w)*scale+"px";
+            lx.css({
+                transform:"translate3d("+x+","+y+",0)"
+            })
+        },randDelay)
+    }
 };
 main.loadFrames = function( object, callback){
     var urls = object.urls;
@@ -2282,6 +2497,13 @@ main.stopRender = function(){
 
 main.addEvent=function(){
     var onIconTransitionEnd = function( e ){
+        // webgl.PointData[webgl.currentPointName].icon_bg.fi();
+        $(".tip-box").addClass("ani-tip").show();
+        setTimeout(function(){
+            $(".tip-box").removeClass("ani-tip").fo();
+        },6000);
+
+        $(this).off("transitionend");
         vm.server_data.gameData[webgl.currentPointName].needAnimation = false;
         webgl.currentPointName = "";
         vm.server_data.gameData.currentPoint = "";
@@ -2289,7 +2511,8 @@ main.addEvent=function(){
             $(".animation-box .tip-all,.animation-box .big-icon").show();
             $(".animation-box .number").hide();
             $(".animation-box").fi();
-        }
+        };
+
     }
     $(".right-box .icon2").on("transitionend",onIconTransitionEnd)
 
@@ -2322,22 +2545,18 @@ main.addEvent=function(){
     };
     var Stage3ToStage2 = function(){
         main.stage = 2;
-        if( false ){
-            main.frames[webgl.currentPointName].video.pause()
-            main.frames[webgl.currentPointName].video.currentTime = 0;
-            $("#player1").show();
-            $(main.frames[webgl.currentPointName].video).hide();
-            webgl.PointData[webgl.currentPointName].img.hide();
+        webgl.PointData[webgl.currentPointName].img.hide();
+        if( vm.ios ){
+            webgl.PointData[webgl.currentPointName].video[0].pause();
+            webgl.PointData[webgl.currentPointName].video[0].currentTime = 0;
+            webgl.PointData[webgl.currentPointName].video.hide();
         }else{
             $("#player2").hide();
             main.player2.pause();
             main.player2.set( 0 );
-            $("#player1").show();
-            webgl.PointData[webgl.currentPointName].img.hide();
             webgl.PointData[webgl.currentPointName].music.pause();
             webgl.PointData[webgl.currentPointName].music.currentTime = 0;
         }
-
         main.player1.direction = -1;
         main.player1.repeat = 0;
         main.player1.set( main.player1.framesLength-1 );
@@ -2345,17 +2564,8 @@ main.addEvent=function(){
         $("#player1").show();
     };
     var Stage2ToStage3 = function(){
-        if( false ){
-            main.player1.direction = 1;
-            main.player1.repeat = 0;
-        }else{
-            main.player1.direction = 1;
-            if( !main.frames[webgl.currentPointName].load_complete ){
-                main.player1.loop = true;
-            }else{
-                main.player1.repeat = 0;
-            }
-        }
+        main.player1.direction = 1;
+        main.player1.repeat = 0;
     };
 
     $(".long-press").on({
@@ -2368,7 +2578,7 @@ main.addEvent=function(){
                 case 2:
                     Stage2ToStage3();
                     return;
-                    break;   
+                    break;
             }
             // if(!main.player1.paused){
             //     main.player1.loop = true;
@@ -2376,9 +2586,11 @@ main.addEvent=function(){
             //     return;
             // }
 
-            webgl.rotateToCenter()
-
-            // webgl.earthGroup.quaternion.copy( q1 )
+            webgl.rotateToCenter();
+            if(vm.ios&&webgl.PointData[webgl.currentPointName].video_haveload==false){
+                webgl.PointData[webgl.currentPointName].video[0].load();
+                webgl.PointData[webgl.currentPointName].video_haveload = true;
+            }
 
         },
         touchmove:function(){},
@@ -2403,17 +2615,17 @@ main.addEvent=function(){
 
     $(".P_webgl .btn-box").on("touchstart",function(e){
         e.preventDefault();
-    })
+    });
 
-var clock = undefined;
-    $(".video-bgm").on({
+    var clock = undefined;
+    var $media = vm.ios?$(".video"):$(".video-bgm");
+    $media.on({
         play: function( e ){
             if(clock){
                 clearTimeout(clock)
                 clock = undefined;
             }
             main.pausebgm();
-            
         },
         pause:function(){
             if(!clock){
@@ -2422,9 +2634,6 @@ var clock = undefined;
                     clock = undefined;
                 },800)
             }
-
-
-
         },
         end: function( e ){
 
@@ -2452,7 +2661,7 @@ $(function(){
     main.start();
     Media.playMedia(main.bgm.id);
     main.bgm.isPlay = true;
-})
+});
 
 
 
